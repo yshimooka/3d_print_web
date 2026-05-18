@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "3D Print Service",
-  description: "3Dデータをアップロードして、お好みの素材で高品質な3Dプリントをお届けするサービスです。",
+  title: "大國造形 | かんたん3Dプリントサービス",
+  description: "3Dのことを知らなくても大丈夫。データを送るだけで、数日後にプリントされたものがお手元に届く3Dプリントサービスです。",
 };
 
 export default function RootLayout({

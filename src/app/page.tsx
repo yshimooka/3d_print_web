@@ -7,7 +7,7 @@ const steps = [
     number: "01",
     title: "3Dデータをアップロード",
     description:
-      "STL・OBJ・GLTF・STEPなど主要フォーマットに対応。ドラッグ&ドロップで即座に高精細なプレビューが起動します。",
+      "3Dファイルをドラッグするだけで送れます。無料の3Dデータサイトで入手したファイルもそのまま使えます。",
     icon: (
       <svg
         width="24"
@@ -29,7 +29,7 @@ const steps = [
     number: "02",
     title: "素材・カラーを選択",
     description:
-      "高機能ナイロンからレジン、メタルまで。用途に合わせた最適な造形材料とシームレスなカラー指定が可能です。",
+      "プラスチックや樹脂、金属まで、わかりやすい説明つきで素材を選べます。色のカスタマイズも簡単です。",
     icon: (
       <svg
         width="24"
@@ -53,7 +53,7 @@ const steps = [
     number: "03",
     title: "最短3日でお届け",
     description:
-      "産業グレードの最新プリンターで出力し、熟練スタッフが検品。最高品質の造形物を迅速にお手元へお届けします。",
+      "注文確定後、最短3日でご自宅にお届けします。品質チェックを済ませたスタッフが丁寧に梱包してお送りします。",
     icon: (
       <svg
         width="24"
@@ -78,57 +78,57 @@ const materials = [
   {
     id: "pla",
     name: "PLA樹脂",
-    tag: "高精度",
+    tag: "初心者におすすめ",
     tagColor: "#34C759",
-    desc: "バイオ素材。滑らかな表面と精密な形状再現性。プロトタイピングに最適です。",
-    method: "FDM",
+    desc: "扱いやすく発色のよいプラスチック素材。フィギュアや雑貨など、はじめての造形に最適です。",
+    method: "スタンダード",
   },
   {
     id: "abs",
     name: "ABS樹脂",
-    tag: "高強度",
+    tag: "丈夫さ重視",
     tagColor: "#FF9F0A",
-    desc: "耐衝撃・耐熱性を誇るエンジニアリング向けの標準素材。機能部品の製作に。",
-    method: "FDM",
+    desc: "衝撃や熱に強いプラスチック。日用品のパーツや工具の代替品として人気があります。",
+    method: "プラスチック",
   },
   {
     id: "petg",
     name: "PETG",
-    tag: "万能",
+    tag: "万能素材",
     tagColor: "#32ADE6",
-    desc: "PLAの造形性とABSの強度を両立。透明感のあるパーツやケース類に。",
-    method: "FDM",
+    desc: "やわらかさと強さを兼ね備えたプラスチック。ケースや外装パーツに向いています。",
+    method: "プラスチック",
   },
   {
     id: "nylon",
     name: "ナイロン",
-    tag: "産業グレード",
+    tag: "高強度",
     tagColor: "#BF5AF2",
-    desc: "強靭な柔軟性を持つ。サポート材を使わず、複雑な幾何学形状を出力可能。",
-    method: "SLS",
+    desc: "しなやかで丈夫なナイロン素材。複雑な形も作れるため、機能部品に選ばれることが多いです。",
+    method: "ナイロン系",
   },
   {
     id: "resin",
     name: "レジン",
-    tag: "超高精細",
+    tag: "超精密",
     tagColor: "#0A84FF",
-    desc: "0.05mmの驚異的な積層ピッチで、フィギュア・微細部品の超精密造形を実現。",
-    method: "SLA/DLP",
+    desc: "細かい部分まで忠実に再現できる樹脂素材。フィギュアや精密模型などに最適です。",
+    method: "樹脂",
   },
   {
     id: "metal",
     name: "メタル",
-    tag: "最高品位",
+    tag: "金属製",
     tagColor: "#8E8E93",
-    desc: "金属粉末を焼結し、高い強度と本物の金属の質感を備えるハイエンド出力。",
-    method: "DMLS",
+    desc: "金属の質感と強度をそのまま再現。本格的なパーツ製作や高品位な仕上がりを求める方に。",
+    method: "金属",
   },
 ];
 
 const features = [
   {
-    title: "AI品質チェック",
-    desc: "アップロードされた3Dモデルを自動解析。印刷リスクのある薄壁やオーバーハングを即座にハイライトします。",
+    title: "自動データチェック",
+    desc: "アップロードされたデータを自動で確認。問題がある場合はわかりやすく知らせるので、安心して注文できます。",
     icon: (
       <svg
         width="20"
@@ -145,8 +145,8 @@ const features = [
     ),
   },
   {
-    title: "リアルタイムプレビュー",
-    desc: "ブラウザ上でインタラクティブに素材と色をシミュレーション。完成品のイメージを正確に確認できます。",
+    title: "仕上がりプレビュー",
+    desc: "注文前にブラウザ上で素材と色を選んで確認できます。完成品のイメージをつかんでから安心して発注できます。",
     icon: (
       <svg
         width="20"
@@ -164,8 +164,8 @@ const features = [
     ),
   },
   {
-    title: "スピード納品",
-    desc: "受注から最短3営業日で出荷。プロジェクトのボトルネックを解消し、迅速な開発サイクルをサポートします。",
+    title: "最短3日でお届け",
+    desc: "注文確定から最短3営業日で発送。急ぎのご依頼にもできる限り対応します。",
     icon: (
       <svg
         width="20"
@@ -183,8 +183,8 @@ const features = [
     ),
   },
   {
-    title: "産業水準の素材",
-    desc: "4つの先進的な造形方式と6種のプログレード素材で、あらゆる強度・品質要件にマッチするソリューションを提供します。",
+    title: "豊富な素材ラインナップ",
+    desc: "プラスチック・樹脂・金属など6種類の素材を用意。初心者の方には用途別のおすすめ素材をご案内します。",
     icon: (
       <svg
         width="20"
@@ -236,7 +236,7 @@ export default function TopPage() {
               className="text-[17px] font-bold tracking-wider"
               style={{ color: "var(--text-primary)" }}
             >
-              日本立体造形
+              大國造形
             </span>
           </div>
 
@@ -292,22 +292,22 @@ export default function TopPage() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]"></span>
               </span>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
-                NEXT GEN 3D PRINTING
+                かんたん 3D プリント注文
               </span>
             </div>
 
             <h1 className="text-[54px] lg:text-[72px] font-black leading-[1.05] tracking-tight mb-8">
-              想像を、
+              あなたの
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] via-[#47A9FF] to-[#BF5AF2]">
-                究極の精度
+                アイデア
               </span>
-              で<br />
-              現実に。
+              を、<br />
+              かたちに。
             </h1>
 
             <p className="text-[17px] leading-[1.8] font-light mb-12 max-w-[500px] text-[var(--text-secondary)]">
-              最先端のプリント技術と洗練されたUI。3Dデータをアップロードして素材を選ぶだけで、プロフェッショナルな造形物を最短3日でお届けします。
+              3Dのことを知らなくても大丈夫。データを送って素材を選ぶだけで、数日後にプリントされたものがお手元に届きます。
             </p>
 
             <div className="flex items-center gap-5 flex-wrap">
@@ -320,7 +320,7 @@ export default function TopPage() {
                   boxShadow: "0 0 30px rgba(255,255,255,0.15)",
                 }}
               >
-                システムへアクセス
+                今すぐ注文する
                 <svg
                   width="18"
                   height="18"
@@ -429,9 +429,9 @@ export default function TopPage() {
                 Features
               </p>
               <h2 className="text-[42px] font-bold tracking-tight text-[var(--text-primary)]">
-                スマートツールで
+                初心者でも
                 <br />
-                完璧なプリントを
+                安心して使える
               </h2>
             </div>
 
@@ -545,12 +545,12 @@ export default function TopPage() {
             </svg>
           </div>
           <h2 className="text-[48px] lg:text-[56px] font-black mb-8 leading-[1.1] tracking-tight">
-            体験を、形に。
+            まずは、気軽に。
           </h2>
           <p className="text-[18px] text-[var(--text-secondary)] mb-12 font-light">
-            アカウントの登録は不要です。
+            アカウント登録は不要です。
             <br />
-            3Dデータをアップロードして、未来のモノづくりを今すぐ体験しましょう。
+            3Dファイルをアップロードして、最短3日でお届けします。
           </p>
           <Link
             href="/order"
@@ -561,7 +561,7 @@ export default function TopPage() {
               boxShadow: "0 20px 40px -10px rgba(191,90,242,0.4)",
             }}
           >
-            システムへ進む
+            注文を始める
             <svg
               width="20"
               height="20"
@@ -584,11 +584,11 @@ export default function TopPage() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <span className="text-[15px] font-bold text-white tracking-widest">
-              日本立体造形
+              大國造形
             </span>
           </div>
           <p className="text-[13px] text-[var(--text-tertiary)]">
-            © 2026 日本立体造形. All rights reserved.
+            © 2026 大國造形. All rights reserved.
           </p>
         </div>
       </footer>

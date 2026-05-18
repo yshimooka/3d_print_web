@@ -97,7 +97,7 @@ export default function OrderPage() {
             className="text-[15px] font-semibold tracking-[-0.01em] hover:opacity-70 transition-opacity"
             style={{ color: 'var(--text-primary)', textDecoration: 'none' }}
           >
-            日本立体造形
+            大國造形
           </a>
           {file && (
             <div className="h-4" style={{ borderLeft: '1px solid var(--border)' }} />
