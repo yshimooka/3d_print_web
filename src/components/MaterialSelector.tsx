@@ -95,19 +95,7 @@ export default function MaterialSelector({
             </div>
 
             {/* Specs */}
-            <div className="rounded-lg p-3 space-y-2" style={{ background: 'var(--surface-secondary)' }}>
-              <div className="flex justify-between text-[12px]">
-                <span style={{ color: 'var(--text-tertiary)' }}>造形方式</span>
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{detailMaterial.method}</span>
-              </div>
-              <div className="flex justify-between text-[12px]">
-                <span style={{ color: 'var(--text-tertiary)' }}>積層ピッチ</span>
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{detailMaterial.layerHeight}</span>
-              </div>
-              <div className="flex justify-between text-[12px]">
-                <span style={{ color: 'var(--text-tertiary)' }}>公差</span>
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{detailMaterial.tolerance}</span>
-              </div>
+            <div className="rounded-lg p-3" style={{ background: 'var(--surface-secondary)' }}>
               <div className="flex justify-between text-[12px]">
                 <span style={{ color: 'var(--text-tertiary)' }}>価格目安</span>
                 <span className="font-medium" style={{ color: 'var(--text-primary)' }}>¥{detailMaterial.pricePerCm3}/cm³〜</span>

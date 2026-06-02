@@ -7,7 +7,6 @@ import {
   CheckCircle,
   Loader2,
   Ruler,
-  Triangle,
   Box,
 } from "lucide-react";
 
@@ -147,7 +146,7 @@ export default function AnalysisPanel({
 
       {/* Model Stats */}
       <div
-        className="p-3 rounded-lg space-y-1.5"
+        className="p-3 rounded-lg"
         style={{ background: 'var(--surface-secondary)' }}
       >
         <p
@@ -158,15 +157,7 @@ export default function AnalysisPanel({
         </p>
         <div className="flex items-center justify-between text-[11px]">
           <span className="flex items-center gap-1.5" style={{ color: 'var(--text-tertiary)' }}>
-            <Triangle size={11} /> ポリゴン数
-          </span>
-          <span style={{ color: 'var(--text-primary)' }}>
-            {result.stats.totalTriangles.toLocaleString()}
-          </span>
-        </div>
-        <div className="flex items-center justify-between text-[11px]">
-          <span className="flex items-center gap-1.5" style={{ color: 'var(--text-tertiary)' }}>
-            <Ruler size={11} /> サイズ
+            <Ruler size={11} /> サイズ（mm）
           </span>
           <span style={{ color: 'var(--text-primary)' }}>
             {result.stats.boundingBox.x.toFixed(1)} × {result.stats.boundingBox.y.toFixed(1)} × {result.stats.boundingBox.z.toFixed(1)}

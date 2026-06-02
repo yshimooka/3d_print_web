@@ -26,6 +26,9 @@ export interface AnalysisResult {
 
 const THIN_WALL_THRESHOLD = 0.8;
 const RAY_SAMPLE_RATE = 0.05;
+// Above this triangle count, raycasting (O(n_rays × n_tris)) becomes prohibitively
+// slow on the main thread — skip the thin-wall pass for large meshes.
+const MAX_RAYCAST_TRIANGLES = 30_000;
 
 // ─── Main Analysis ───────────────────────────────────
 
@@ -63,52 +66,54 @@ export function analyzeGeometry(object: THREE.Object3D): AnalysisResult {
   const dimensions = new THREE.Vector3();
   merged.boundingBox!.getSize(dimensions);
 
-  let surfaceArea = 0;
   let thinWallFaces = 0;
-
-  // ── Thin wall detection ──
   const thinWallIndices: number[] = [];
-  const raycaster = new THREE.Raycaster();
-  raycaster.firstHitOnly = true;
 
-  const tempMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
-  const tempMesh = new THREE.Mesh(merged, tempMaterial);
+  // ── Thin wall detection (skipped for large meshes) ──
+  // Raycasting is O(n_rays × n_triangles) with no BVH → freezes for large meshes.
+  if (triCount <= MAX_RAYCAST_TRIANGLES) {
+    const raycaster = new THREE.Raycaster();
+    raycaster.firstHitOnly = true;
 
-  const sampleCount = Math.max(10, Math.floor(position.count * RAY_SAMPLE_RATE));
-  const step = Math.max(1, Math.floor(position.count / sampleCount));
-  const vertNormal = new THREE.Vector3();
-  const rayOrigin = new THREE.Vector3();
-  const thinVertexSet = new Set<number>();
+    const tempMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
+    const tempMesh = new THREE.Mesh(merged, tempMaterial);
 
-  for (let vi = 0; vi < position.count; vi += step) {
-    rayOrigin.fromBufferAttribute(position, vi);
-    vertNormal.fromBufferAttribute(normal, vi).normalize();
+    const sampleCount = Math.max(10, Math.floor(position.count * RAY_SAMPLE_RATE));
+    const step = Math.max(1, Math.floor(position.count / sampleCount));
+    const vertNormal = new THREE.Vector3();
+    const rayOrigin = new THREE.Vector3();
+    const thinVertexSet = new Set<number>();
 
-    const invertedNormal = vertNormal.clone().negate();
-    const offset = rayOrigin.clone().add(invertedNormal.clone().multiplyScalar(0.01));
+    for (let vi = 0; vi < position.count; vi += step) {
+      rayOrigin.fromBufferAttribute(position, vi);
+      vertNormal.fromBufferAttribute(normal, vi).normalize();
 
-    raycaster.set(offset, invertedNormal);
-    const hits = raycaster.intersectObject(tempMesh, false);
+      const invertedNormal = vertNormal.clone().negate();
+      const offset = rayOrigin.clone().add(invertedNormal.clone().multiplyScalar(0.01));
 
-    if (hits.length > 0 && hits[0].distance < THIN_WALL_THRESHOLD) {
-      thinVertexSet.add(vi);
-    }
-  }
+      raycaster.set(offset, invertedNormal);
+      const hits = raycaster.intersectObject(tempMesh, false);
 
-  if (thinVertexSet.size > 0) {
-    for (let i = 0; i < triCount; i++) {
-      const i0 = index.getX(i * 3);
-      const i1 = index.getX(i * 3 + 1);
-      const i2 = index.getX(i * 3 + 2);
-      if (thinVertexSet.has(i0) || thinVertexSet.has(i1) || thinVertexSet.has(i2)) {
-        faceSeverity[i] = Math.max(faceSeverity[i], 2);
-        thinWallIndices.push(i);
-        thinWallFaces++;
+      if (hits.length > 0 && hits[0].distance < THIN_WALL_THRESHOLD) {
+        thinVertexSet.add(vi);
       }
     }
-  }
 
-  tempMaterial.dispose();
+    if (thinVertexSet.size > 0) {
+      for (let i = 0; i < triCount; i++) {
+        const i0 = index.getX(i * 3);
+        const i1 = index.getX(i * 3 + 1);
+        const i2 = index.getX(i * 3 + 2);
+        if (thinVertexSet.has(i0) || thinVertexSet.has(i1) || thinVertexSet.has(i2)) {
+          faceSeverity[i] = Math.max(faceSeverity[i], 2);
+          thinWallIndices.push(i);
+          thinWallFaces++;
+        }
+      }
+    }
+
+    tempMaterial.dispose();
+  }
 
   // ── Build issues ──
   const issues: AnalysisIssue[] = [];
@@ -135,7 +140,7 @@ export function analyzeGeometry(object: THREE.Object3D): AnalysisResult {
     stats: {
       totalTriangles: triCount,
       boundingBox: dimensions,
-      surfaceArea,
+      surfaceArea: 0,
       thinWallPercentage: triCount > 0 ? (thinWallFaces / triCount) * 100 : 0,
     },
     faceSeverity,

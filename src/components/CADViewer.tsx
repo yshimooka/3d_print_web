@@ -4,10 +4,12 @@ import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Stage, OrbitControls, Center, useProgress, Html } from "@react-three/drei";
 import * as THREE from "three";
-import { STLLoader, OBJLoader, GLTFLoader } from "three-stdlib";
+import { OBJLoader, GLTFLoader } from "three-stdlib";
 import { AlertCircle } from "lucide-react";
 import { type MaterialRenderProps } from "@/data/materials";
 import { type AnalysisResult, applyHighlightColors, removeHighlightColors } from "@/utils/printAnalysis";
+
+// ─── Inner scene components ──────────────────────────────────────────────────
 
 function Loader() {
   const { progress } = useProgress();
@@ -40,28 +42,34 @@ const DEFAULT_RENDER: MaterialRenderProps = {
 
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
-function Model({ url, fileType, colorHex, materialProps, onModelLoaded, showAnalysisOverlay, analysisResult }: {
-  url: string; fileType: string; colorHex?: string; materialProps?: MaterialRenderProps;
+// ─── Model ───────────────────────────────────────────────────────────────────
+
+function Model({
+  url, fileType, colorHex, materialProps, onModelLoaded,
+  showAnalysisOverlay, analysisResult,
+  onParseProgress, onDecimated,
+}: {
+  url: string;
+  fileType: string;
+  colorHex?: string;
+  materialProps?: MaterialRenderProps;
   onModelLoaded?: (model: THREE.Object3D) => void;
   showAnalysisOverlay?: boolean;
   analysisResult?: AnalysisResult | null;
+  onParseProgress?: (progress: number | null) => void;
+  onDecimated?: (info: { displayTriCount: number; originalTriCount: number }) => void;
 }) {
   const [model, setModel] = useState<THREE.Object3D | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const targetColor = useRef(new THREE.Color(colorHex || '#999999'));
+  const targetColor = useRef(new THREE.Color(colorHex || "#999999"));
   const targetProps = useRef<MaterialRenderProps>({ ...DEFAULT_RENDER });
   const modelRef = useRef<THREE.Object3D | null>(null);
 
-  useEffect(() => {
-    if (colorHex) targetColor.current.set(colorHex);
-  }, [colorHex]);
-
-  useEffect(() => {
-    if (materialProps) targetProps.current = { ...materialProps };
-  }, [materialProps]);
+  useEffect(() => { if (colorHex) targetColor.current.set(colorHex); }, [colorHex]);
+  useEffect(() => { if (materialProps) targetProps.current = { ...materialProps }; }, [materialProps]);
 
   useFrame(() => {
-    if (!modelRef.current || showAnalysisOverlay) return; // skip animation when overlay is active
+    if (!modelRef.current || showAnalysisOverlay) return;
     const t = 0.06;
     const tp = targetProps.current;
     modelRef.current.traverse((child) => {
@@ -82,11 +90,8 @@ function Model({ url, fileType, colorHex, materialProps, onModelLoaded, showAnal
     });
   });
 
-  useEffect(() => {
-    modelRef.current = model;
-  }, [model]);
+  useEffect(() => { modelRef.current = model; }, [model]);
 
-  // Toggle analysis overlay on/off
   useEffect(() => {
     if (!modelRef.current || !analysisResult) return;
     if (showAnalysisOverlay) {
@@ -96,107 +101,127 @@ function Model({ url, fileType, colorHex, materialProps, onModelLoaded, showAnal
     }
   }, [showAnalysisOverlay, analysisResult]);
 
+  // Model loading
   useEffect(() => {
     let active = true;
+    let worker: Worker | null = null;
+
+    // ── STL: parse in Web Worker to avoid freezing the main thread ──
+    if (fileType === "stl") {
+      const loadSTL = async () => {
+        try {
+          onParseProgress?.(0);
+          const response = await fetch(url);
+          if (!active) return;
+          const buffer = await response.arrayBuffer();
+          if (!active) return;
+
+          worker = new Worker(
+            new URL("../workers/stl-parser.worker.ts", import.meta.url)
+          );
+
+          worker.onmessage = (e: MessageEvent) => {
+            const msg = e.data;
+            if (msg.type === "progress") {
+              if (active) onParseProgress?.(msg.value);
+            } else if (msg.type === "done") {
+              if (!active) return;
+              const geometry = new THREE.BufferGeometry();
+              geometry.setAttribute("position", new THREE.BufferAttribute(msg.positions, 3));
+              geometry.setAttribute("normal",   new THREE.BufferAttribute(msg.normals,   3));
+              const rp = materialProps || DEFAULT_RENDER;
+              const material = new THREE.MeshPhysicalMaterial({
+                color: colorHex || "#999999",
+                roughness: rp.roughness, metalness: rp.metalness,
+                clearcoat: rp.clearcoat, clearcoatRoughness: rp.clearcoatRoughness,
+                transmission: rp.transmission, opacity: rp.opacity,
+                transparent: rp.opacity < 1 || rp.transmission > 0,
+                envMapIntensity: rp.envMapIntensity, ior: rp.ior,
+                side: THREE.DoubleSide,
+              });
+              const mesh = new THREE.Mesh(geometry, material);
+              setModel(mesh);
+              onParseProgress?.(null);
+              if (msg.wasDecimated) {
+                onDecimated?.({
+                  displayTriCount:  msg.displayTriCount,
+                  originalTriCount: msg.originalTriCount,
+                });
+              }
+              if (onModelLoaded) onModelLoaded(mesh);
+            } else if (msg.type === "error") {
+              if (active) setError(msg.message);
+              onParseProgress?.(null);
+            }
+          };
+
+          worker.postMessage(buffer, [buffer]);
+        } catch (err: any) {
+          if (active) setError(err.message || "STLの読み込みに失敗しました");
+          onParseProgress?.(null);
+        }
+      };
+
+      loadSTL();
+      return () => {
+        active = false;
+        worker?.terminate();
+        onParseProgress?.(null);
+      };
+    }
+
+    // ── OBJ / GLTF / STEP ──
     let loader: any;
 
-    if (fileType === "stl") {
-      loader = new STLLoader();
-    } else if (fileType === "obj") {
+    if (fileType === "obj") {
       loader = new OBJLoader();
     } else if (fileType === "gltf" || fileType === "glb") {
       loader = new GLTFLoader();
     } else if (fileType === "stp" || fileType === "step") {
-      // Handle STEP files using occt-import-js
       const loadStepFile = async () => {
         try {
-          // Dynamically import occtimportjs to avoid SSR issues
           // @ts-ignore
-          const occtimportjs = (await import('occt-import-js')).default;
-          // IMPORTANT: occt-import-js requires the WASM file to be accessible 
-          // at the root url by default, which we set up by copying it to public/
-          
+          const occtimportjs = (await import("occt-import-js")).default;
           const occt = await occtimportjs({
-            locateFile: (path: string) => {
-              if (path.endsWith('.wasm')) {
-                return '/occt-import-js.wasm';
-              }
-              return path;
-            }
+            locateFile: (path: string) => (path.endsWith(".wasm") ? "/occt-import-js.wasm" : path),
           });
-          
           const response = await fetch(url);
           const buffer = await response.arrayBuffer();
           const fileBuffer = new Uint8Array(buffer);
-          
-          // Read STEP file
           const result = occt.ReadStepFile(fileBuffer, null);
-          
           if (!active) return;
-          
-          if (!result || !result.success) {
-            throw new Error("Failed to parse STEP file geometry.");
-          }
-
-          // Convert occt result to Three.js Meshes
+          if (!result || !result.success) throw new Error("Failed to parse STEP file geometry.");
           const group = new THREE.Group();
-          
           for (const rawMesh of result.meshes) {
             const geometry = new THREE.BufferGeometry();
-            
-            geometry.setAttribute(
-              'position',
-              new THREE.Float32BufferAttribute(rawMesh.attributes.position.array, 3)
-            );
-            
+            geometry.setAttribute("position", new THREE.Float32BufferAttribute(rawMesh.attributes.position.array, 3));
             if (rawMesh.attributes.normal) {
-              geometry.setAttribute(
-                'normal',
-                new THREE.Float32BufferAttribute(rawMesh.attributes.normal.array, 3)
-              );
+              geometry.setAttribute("normal", new THREE.Float32BufferAttribute(rawMesh.attributes.normal.array, 3));
             } else {
               geometry.computeVertexNormals();
             }
-            
-            geometry.setIndex(
-              new THREE.Uint32BufferAttribute(rawMesh.index.array, 1)
-            );
-
-            let color = new THREE.Color(colorHex || '#999999');
-            if (!colorHex && rawMesh.color) {
-              color.setRGB(rawMesh.color[0], rawMesh.color[1], rawMesh.color[2]);
-            }
+            geometry.setIndex(new THREE.Uint32BufferAttribute(rawMesh.index.array, 1));
+            let color = new THREE.Color(colorHex || "#999999");
+            if (!colorHex && rawMesh.color) color.setRGB(rawMesh.color[0], rawMesh.color[1], rawMesh.color[2]);
             const rp = materialProps || DEFAULT_RENDER;
             const material = new THREE.MeshPhysicalMaterial({
-              color,
-              roughness: rp.roughness,
-              metalness: rp.metalness,
-              clearcoat: rp.clearcoat,
-              clearcoatRoughness: rp.clearcoatRoughness,
-              transmission: rp.transmission,
-              opacity: rp.opacity,
+              color, roughness: rp.roughness, metalness: rp.metalness,
+              clearcoat: rp.clearcoat, clearcoatRoughness: rp.clearcoatRoughness,
+              transmission: rp.transmission, opacity: rp.opacity,
               transparent: rp.opacity < 1 || rp.transmission > 0,
-              envMapIntensity: rp.envMapIntensity,
-              ior: rp.ior,
-              side: THREE.DoubleSide,
+              envMapIntensity: rp.envMapIntensity, ior: rp.ior, side: THREE.DoubleSide,
             });
-            
-            const mesh = new THREE.Mesh(geometry, material);
-            group.add(mesh);
+            group.add(new THREE.Mesh(geometry, material));
           }
-          
           setModel(group);
           if (onModelLoaded) onModelLoaded(group);
         } catch (err: any) {
           if (!active) return;
-          console.error("Error loading STEP model:", err);
           setError(err.message || "Failed to parse the STEP file.");
         }
       };
-      
       loadStepFile();
-      return; // Skip the standard loader process
-      
+      return;
     } else {
       setError("Unsupported file format.");
       return;
@@ -206,26 +231,7 @@ function Model({ url, fileType, colorHex, materialProps, onModelLoaded, showAnal
       url,
       (data: any) => {
         if (!active) return;
-        if (fileType === "stl") {
-          const geometry = data as THREE.BufferGeometry;
-          const rp = materialProps || DEFAULT_RENDER;
-          const material = new THREE.MeshPhysicalMaterial({
-            color: colorHex || '#999999',
-            roughness: rp.roughness,
-            metalness: rp.metalness,
-            clearcoat: rp.clearcoat,
-            clearcoatRoughness: rp.clearcoatRoughness,
-            transmission: rp.transmission,
-            opacity: rp.opacity,
-            transparent: rp.opacity < 1 || rp.transmission > 0,
-            envMapIntensity: rp.envMapIntensity,
-            ior: rp.ior,
-            side: THREE.DoubleSide,
-          });
-          const mesh = new THREE.Mesh(geometry, material);
-          setModel(mesh);
-          if (onModelLoaded) onModelLoaded(mesh);
-        } else if (fileType === "gltf" || fileType === "glb") {
+        if (fileType === "gltf" || fileType === "glb") {
           setModel(data.scene);
           if (onModelLoaded) onModelLoaded(data.scene);
         } else if (fileType === "obj") {
@@ -236,14 +242,11 @@ function Model({ url, fileType, colorHex, materialProps, onModelLoaded, showAnal
       undefined,
       (err: any) => {
         if (!active) return;
-        console.error("Error loading model:", err);
         setError(err.message || "Failed to parse the file.");
       }
     );
 
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [url, fileType]);
 
   if (error) {
@@ -258,21 +261,26 @@ function Model({ url, fileType, colorHex, materialProps, onModelLoaded, showAnal
     );
   }
 
-  return (
-    <>
-      {model && <primitive object={model} />}
-    </>
-  );
+  return <>{model && <primitive object={model} />}</>;
 }
 
-export default function CADViewer({ file, colorHex, materialProps, onModelLoaded, showAnalysisOverlay, analysisResult }: {
-  file: File; colorHex?: string; materialProps?: MaterialRenderProps;
+// ─── CADViewer (exported) ─────────────────────────────────────────────────────
+
+export default function CADViewer({
+  file, colorHex, materialProps, onModelLoaded,
+  showAnalysisOverlay, analysisResult,
+}: {
+  file: File;
+  colorHex?: string;
+  materialProps?: MaterialRenderProps;
   onModelLoaded?: (model: THREE.Object3D) => void;
   showAnalysisOverlay?: boolean;
   analysisResult?: AnalysisResult | null;
 }) {
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [parseProgress, setParseProgress] = useState<number | null>(null);
+  const [decimated, setDecimated] = useState(false);
 
   const fileType = useMemo(() => {
     const extension = file.name.split(".").pop()?.toLowerCase();
@@ -280,55 +288,103 @@ export default function CADViewer({ file, colorHex, materialProps, onModelLoaded
   }, [file]);
 
   useEffect(() => {
+    setParseProgress(null);
+    setDecimated(false);
+  }, [file]);
+
+  useEffect(() => {
     try {
       const objectUrl = URL.createObjectURL(file);
       setUrl(objectUrl);
       setError(null);
-
-      return () => {
-        URL.revokeObjectURL(objectUrl);
-      };
+      return () => URL.revokeObjectURL(objectUrl);
     } catch (err: any) {
       setError("Failed to create object URL for file.");
     }
   }, [file]);
 
-  if (error) {
-    return <ErrorFallback error={error} />;
-  }
+  if (error) return <ErrorFallback error={error} />;
 
   return (
     <div className="w-full h-full relative group">
       {url && (
         <Canvas shadows dpr={[1, 2]} camera={{ position: [0, 0, 150], fov: 50 }}>
           <color attach="background" args={["#F0F0F2"]} />
-          
           <ambientLight intensity={0.5} />
-          
+
           <Suspense fallback={<Loader />}>
             <Stage environment="city" intensity={0.5} adjustCamera={1.4}>
               <Center>
-                <Model url={url} fileType={fileType} colorHex={colorHex} materialProps={materialProps} onModelLoaded={onModelLoaded} showAnalysisOverlay={showAnalysisOverlay} analysisResult={analysisResult} />
+                <Model
+                  url={url}
+                  fileType={fileType}
+                  colorHex={colorHex}
+                  materialProps={materialProps}
+                  onModelLoaded={onModelLoaded}
+                  showAnalysisOverlay={showAnalysisOverlay}
+                  analysisResult={analysisResult}
+                  onParseProgress={setParseProgress}
+                  onDecimated={() => setDecimated(true)}
+                />
               </Center>
             </Stage>
           </Suspense>
-          
-          <OrbitControls 
-            makeDefault 
-            autoRotate 
-            autoRotateSpeed={0.5} 
-            enableDamping 
-            dampingFactor={0.05}
-          />
+
+          <OrbitControls makeDefault autoRotate autoRotateSpeed={0.5} enableDamping dampingFactor={0.05} />
         </Canvas>
       )}
-      
-      {/* Controls Overlay Hint */}
+
+      {/* STL parse progress overlay */}
+      {parseProgress !== null && (
+        <div
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4"
+          style={{ background: "rgba(3,3,5,0.7)", backdropFilter: "blur(4px)" }}
+        >
+          <p className="text-[15px] font-medium" style={{ color: "var(--text-primary)" }}>
+            データを読み込んでいます... {parseProgress}%
+          </p>
+          <div className="w-64 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--surface-secondary)" }}>
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${parseProgress}%`, background: "var(--accent)" }}
+            />
+          </div>
+          <p className="text-[12px]" style={{ color: "var(--text-tertiary)" }}>
+            大きいファイルは少し時間がかかります
+          </p>
+        </div>
+      )}
+
+      {/* Decimation notice */}
+      {decimated && (
+        <div className="absolute bottom-12 left-0 right-0 flex justify-center pointer-events-none">
+          <div
+            className="px-3 py-1.5 rounded-full text-[11px]"
+            style={{
+              background: "rgba(0,0,0,0.55)",
+              backdropFilter: "blur(8px)",
+              color: "rgba(255,255,255,0.7)",
+            }}
+          >
+            プレビュー表示用に最適化しています（元データは印刷時にそのまま使用されます）
+          </div>
+        </div>
+      )}
+
+      {/* Controls hint */}
       <div className="absolute bottom-4 left-0 right-0 pointer-events-none flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="px-4 py-1.5 rounded-full flex gap-4 text-[11px]" style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', color: 'var(--text-secondary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-          <span><strong style={{ color: 'var(--text-primary)' }}>左クリック</strong> 回転</span>
-          <span><strong style={{ color: 'var(--text-primary)' }}>右クリック</strong> 移動</span>
-          <span><strong style={{ color: 'var(--text-primary)' }}>スクロール</strong> ズーム</span>
+        <div
+          className="px-4 py-1.5 rounded-full flex gap-4 text-[11px]"
+          style={{
+            background: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(8px)",
+            color: "var(--text-secondary)",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+          }}
+        >
+          <span><strong style={{ color: "var(--text-primary)" }}>左クリック</strong> 回転</span>
+          <span><strong style={{ color: "var(--text-primary)" }}>右クリック</strong> 移動</span>
+          <span><strong style={{ color: "var(--text-primary)" }}>スクロール</strong> ズーム</span>
         </div>
       </div>
     </div>

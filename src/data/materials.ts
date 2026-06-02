@@ -37,7 +37,7 @@ export const materials: Material[] = [
     name: "PLA",
     nameJa: "PLA樹脂",
     description: "最もポピュラーな素材。環境にやさしく、精度の高い仕上がり。",
-    details: "植物由来のバイオプラスチック。寸法精度が高く、表面も滑らかに仕上がります。プロトタイプや装飾品、建築模型に最適です。",
+    details: "植物由来のエコなプラスチックです。色の発色がよく滑らかな仕上がりが特徴。フィギュアや置き物、試作品など幅広い用途に使えます。はじめての方にもっともおすすめの素材です。",
     image: "/materials/pla.png",
     colors: [
       { name: "ホワイト", hex: "#F5F5F5" },
@@ -71,7 +71,7 @@ export const materials: Material[] = [
     name: "ABS",
     nameJa: "ABS樹脂",
     description: "耐衝撃性・耐熱性に優れた汎用プラスチック。",
-    details: "自動車部品やLEGOにも使われる高強度素材。後加工（研磨・塗装・アセトン処理）で表面を滑らかに仕上げることも可能です。",
+    details: "LEGOブロックと同じ種類のプラスチックです。丈夫で熱にも強く、実際に使う部品を作るのに向いています。研磨や塗装で表面を仕上げることもできます。",
     image: "/materials/abs.png",
     colors: [
       { name: "ホワイト", hex: "#F5F5F5" },
@@ -102,7 +102,7 @@ export const materials: Material[] = [
     name: "PETG",
     nameJa: "PETG樹脂",
     description: "透明性が高く、食品安全基準にも対応。",
-    details: "PETボトルと同系統の素材で、透明性と耐薬品性に優れます。食品容器や医療器具のプロトタイプ、透明カバーなどに適しています。",
+    details: "ペットボトルと同じ種類のプラスチックです。透明感があり水や薬品にも強い素材。透明なカバーやケース、容器などに適しています。",
     image: "/materials/petg.png",
     colors: [
       { name: "クリア", hex: "#E0F2FE" },
@@ -133,7 +133,7 @@ export const materials: Material[] = [
     name: "Nylon",
     nameJa: "ナイロン",
     description: "高い強度と柔軟性を持つエンジニアリング素材。",
-    details: "SLS（選択的レーザー焼結）方式で造形。サポート材不要で複雑な機構パーツや可動部品、スナップフィットの製作に最適です。",
+    details: "軽くて丈夫なナイロン素材です。多少の力が加わっても折れにくく、複雑な形状も作れます。動く部品や強度が必要なパーツに向いています。",
     image: "/materials/nylon.png",
     colors: [
       { name: "ナチュラル", hex: "#FEF3C7" },
@@ -162,7 +162,7 @@ export const materials: Material[] = [
     name: "Resin",
     nameJa: "レジン（光造形）",
     description: "超高精度。フィギュアやジュエリー原型に。",
-    details: "SLA/DLP方式による光造形。層の厚みが25〜50μmと極めて薄く、微細なディテールまで再現。フィギュアやジュエリー原型に最適です。",
+    details: "光で固める樹脂素材で、非常に細かい部分まで忠実に再現できます。表面がなめらかで美しい仕上がりが特徴。フィギュアやアクセサリーの原型制作に最適です。",
     image: "/materials/resin.png",
     colors: [
       { name: "グレー", hex: "#9CA3AF" },
@@ -192,7 +192,7 @@ export const materials: Material[] = [
     name: "Metal",
     nameJa: "メタル（チタン合金）",
     description: "航空宇宙・医療グレードの金属素材。",
-    details: "DMLS（直接金属レーザー焼結）方式で造形。チタン合金Ti-6Al-4Vを使用し、航空宇宙や医療インプラントレベルの強度と精度を実現します。",
+    details: "金属そのものを3Dプリントした素材です。非常に強く錆びにくいチタン合金を使用。高い強度や本物の金属の質感が求められる部品に向いています。",
     image: "/materials/metal.png",
     colors: [
       { name: "シルバー", hex: "#C0C0C0" },

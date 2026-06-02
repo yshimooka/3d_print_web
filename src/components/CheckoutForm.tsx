@@ -9,7 +9,6 @@ import {
   Package,
   ShieldCheck,
   Lock,
-  ChevronRight,
 } from "lucide-react";
 
 interface CheckoutFormProps {
@@ -211,21 +210,6 @@ export default function CheckoutForm({
                   <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                     {quantity}個
                   </span>
-                </div>
-
-                {/* Specs */}
-                <div
-                  className="rounded-lg p-3 space-y-1.5 mt-1"
-                  style={{ background: 'var(--surface-secondary)' }}
-                >
-                  <div className="flex justify-between text-[11px]">
-                    <span style={{ color: 'var(--text-tertiary)' }}>造形方式</span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{material.method}</span>
-                  </div>
-                  <div className="flex justify-between text-[11px]">
-                    <span style={{ color: 'var(--text-tertiary)' }}>公差</span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{material.tolerance}</span>
-                  </div>
                 </div>
 
                 {/* Divider */}

@@ -49,13 +49,15 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
           className="text-[32px] font-semibold tracking-[-0.02em] leading-[1.15] mb-3"
           style={{ color: 'var(--text-primary)' }}
         >
-          3Dモデルをアップロード
+          3Dファイルをアップロード
         </h2>
         <p
           className="text-[15px] leading-relaxed"
           style={{ color: 'var(--text-secondary)' }}
         >
-          データをもとに、お好みの素材で高品質なプリントをお届けします。
+          AIで作った3Dファイルをそのまま使えます。
+          <br />
+          アップロードするだけで注文できます。
         </p>
       </div>
 
@@ -126,7 +128,7 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
         className="mt-4 text-[12px] text-center"
         style={{ color: 'var(--text-tertiary)' }}
       >
-        ファイルはブラウザ内で処理され、サーバーには送信されません。
+        STL / OBJ / GLTF / STEP 形式に対応しています
       </p>
     </div>
   );
