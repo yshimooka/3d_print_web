@@ -1,4 +1,19 @@
 import Link from "next/link";
+import HeroSection from "@/components/HeroSection";
+import Reveal from "@/components/Reveal";
+import StaggerReveal from "@/components/StaggerReveal";
+
+// ─── Section divider: 3 stacked hairlines evoke FDM print layers ─────────────
+
+function LayerDivider() {
+  return (
+    <div className="px-8 py-5 layer-lines" aria-hidden="true">
+      <span />
+      <span />
+      <span />
+    </div>
+  );
+}
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -10,8 +25,8 @@ const steps = [
       "3Dファイルをドラッグするだけで送れます。無料の3Dデータサイトで入手したファイルもそのまま使えます。",
     icon: (
       <svg
-        width="24"
-        height="24"
+        width="22"
+        height="22"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -32,8 +47,8 @@ const steps = [
       "プラスチックや樹脂、金属まで、わかりやすい説明つきで素材を選べます。色のカスタマイズも簡単です。",
     icon: (
       <svg
-        width="24"
-        height="24"
+        width="22"
+        height="22"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -56,8 +71,8 @@ const steps = [
       "注文確定後、最短3日でご自宅にお届けします。品質チェックを済ませたスタッフが丁寧に梱包してお送りします。",
     icon: (
       <svg
-        width="24"
-        height="24"
+        width="22"
+        height="22"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -79,7 +94,7 @@ const materials = [
     id: "pla",
     name: "PLA樹脂",
     tag: "初心者におすすめ",
-    tagColor: "#34C759",
+    tagColor: "#5BA85A",
     desc: "扱いやすく発色のよいプラスチック素材。フィギュアや雑貨など、はじめての造形に最適です。",
     method: "スタンダード",
   },
@@ -87,7 +102,7 @@ const materials = [
     id: "abs",
     name: "ABS樹脂",
     tag: "丈夫さ重視",
-    tagColor: "#FF9F0A",
+    tagColor: "#D4702A",
     desc: "衝撃や熱に強いプラスチック。日用品のパーツや工具の代替品として人気があります。",
     method: "プラスチック",
   },
@@ -95,7 +110,7 @@ const materials = [
     id: "petg",
     name: "PETG",
     tag: "万能素材",
-    tagColor: "#32ADE6",
+    tagColor: "#4A7FA8",
     desc: "やわらかさと強さを兼ね備えたプラスチック。ケースや外装パーツに向いています。",
     method: "プラスチック",
   },
@@ -103,7 +118,7 @@ const materials = [
     id: "nylon",
     name: "ナイロン",
     tag: "高強度",
-    tagColor: "#BF5AF2",
+    tagColor: "#8B5CF6",
     desc: "しなやかで丈夫なナイロン素材。複雑な形も作れるため、機能部品に選ばれることが多いです。",
     method: "ナイロン系",
   },
@@ -111,7 +126,7 @@ const materials = [
     id: "resin",
     name: "レジン",
     tag: "超精密",
-    tagColor: "#0A84FF",
+    tagColor: "#2563EB",
     desc: "細かい部分まで忠実に再現できる樹脂素材。フィギュアや精密模型などに最適です。",
     method: "樹脂",
   },
@@ -119,7 +134,7 @@ const materials = [
     id: "metal",
     name: "メタル",
     tag: "金属製",
-    tagColor: "#8E8E93",
+    tagColor: "#9CA3AF",
     desc: "金属の質感と強度をそのまま再現。本格的なパーツ製作や高品位な仕上がりを求める方に。",
     method: "金属",
   },
@@ -130,17 +145,9 @@ const features = [
     title: "自動データチェック",
     desc: "アップロードされたデータを自動で確認。問題がある場合はわかりやすく知らせるので、安心して注文できます。",
     icon: (
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        <polyline points="9 12 11 14 15 10" />
       </svg>
     ),
   },
@@ -148,16 +155,7 @@ const features = [
     title: "仕上がりプレビュー",
     desc: "注文前にブラウザ上で素材と色を選んで確認できます。完成品のイメージをつかんでから安心して発注できます。",
     icon: (
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
         <circle cx="12" cy="12" r="3" />
       </svg>
@@ -167,16 +165,7 @@ const features = [
     title: "最短3日でお届け",
     desc: "注文確定から最短3営業日で発送。急ぎのご依頼にもできる限り対応します。",
     icon: (
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
       </svg>
@@ -186,19 +175,10 @@ const features = [
     title: "豊富な素材ラインナップ",
     desc: "プラスチック・樹脂・金属など6種類の素材を用意。初心者の方には用途別のおすすめ素材をご案内します。",
     icon: (
-      <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="12 2 2 7 12 12 22 7 12 2" />
         <polyline points="2 17 12 22 22 17" />
-        <polyline points="2 12 17 22 12" />
+        <polyline points="2 12 12 17 22 12" />
       </svg>
     ),
   },
@@ -209,33 +189,24 @@ const features = [
 export default function TopPage() {
   return (
     <div
-      className="min-h-screen text-[var(--foreground)] selection:bg-[var(--accent)] selection:text-white"
+      className="min-h-screen text-[var(--foreground)]"
       style={{ background: "var(--background)" }}
     >
       {/* ── Navigation ── */}
-      <nav className="fixed top-0 w-full z-50 transition-all duration-300 glass-panel border-x-0 border-t-0 border-b-[var(--border)]">
-        <div className="max-w-7xl mx-auto h-[72px] px-8 flex items-center justify-between">
+      <nav className="fixed top-0 w-full z-50 glass-panel border-x-0 border-t-0">
+        <div className="max-w-7xl mx-auto h-[64px] px-8 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[#47A9FF] flex items-center justify-center shadow-[0_0_20px_rgba(41,151,255,0.4)]">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#FFF"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+            <div
+              className="w-7 h-7 rounded-md flex items-center justify-center"
+              style={{ background: "var(--accent)" }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="12 2 2 7 12 12 22 7 12 2" />
                 <polyline points="2 17 12 22 22 17" />
                 <polyline points="2 12 12 17 22 12" />
               </svg>
             </div>
-            <span
-              className="text-[17px] font-bold tracking-wider"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <span className="text-[16px] font-bold tracking-wide" style={{ color: "var(--text-primary)" }}>
               大國造形
             </span>
           </div>
@@ -250,344 +221,245 @@ export default function TopPage() {
                 key={href}
                 href={href}
                 className="text-[13px] font-medium tracking-wide transition-colors hover:text-[var(--text-primary)]"
-                style={{
-                  color: "var(--text-secondary)",
-                  textDecoration: "none",
-                }}
+                style={{ color: "var(--text-secondary)", textDecoration: "none" }}
               >
                 {label}
               </a>
             ))}
           </div>
 
-          <div className="flex items-center">
-            <Link
-              href="/order"
-              className="group text-[13px] font-bold px-6 py-2.5 rounded-full transition-all relative overflow-hidden"
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.12)",
-                color: "var(--text-primary)",
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-[var(--accent)] to-[#47A9FF] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <span className="relative z-10">注文を始める</span>
-            </Link>
-          </div>
+          <Link
+            href="/order"
+            className="text-[13px] font-semibold px-5 py-2 rounded-full transition-all hover:opacity-90"
+            style={{ background: "var(--accent)", color: "#FFFFFF" }}
+          >
+            注文を始める
+          </Link>
         </div>
       </nav>
 
-      {/* ── Hero ── */}
-      <section className="relative pt-[120px] pb-32 px-8 min-h-[90vh] flex items-center overflow-hidden hero-bg">
-        {/* Ambient background glows */}
-        <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[var(--accent)] rounded-full mix-blend-screen filter blur-[120px] opacity-10 pointer-events-none transform -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[#BF5AF2] rounded-full mix-blend-screen filter blur-[120px] opacity-10 pointer-events-none transform translate-x-1/2 translate-y-1/2" />
+      {/* ── Hero (client component: Three.js + anime.js entrance) ── */}
+      <HeroSection />
 
-        <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          {/* Text Content */}
-          <div className="order-2 lg:order-1 relative z-20">
-            <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-[12px] font-bold tracking-widest mb-10 border border-[rgba(255,255,255,0.1)] glass-panel">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]"></span>
-              </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-gray-200 to-gray-400">
-                かんたん 3D プリント注文
-              </span>
-            </div>
-
-            <h1 className="text-[54px] lg:text-[72px] font-black leading-[1.05] tracking-tight mb-8">
-              あなたの
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent)] via-[#47A9FF] to-[#BF5AF2]">
-                アイデア
-              </span>
-              を、<br />
-              かたちに。
-            </h1>
-
-            <p className="text-[17px] leading-[1.8] font-light mb-12 max-w-[500px] text-[var(--text-secondary)]">
-              3Dのことを知らなくても大丈夫。データを送って素材を選ぶだけで、数日後にプリントされたものがお手元に届きます。
-            </p>
-
-            <div className="flex items-center gap-5 flex-wrap">
-              <Link
-                href="/order"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-xl text-[15px] font-bold transition-all relative overflow-hidden card-lift"
-                style={{
-                  background: "var(--text-primary)",
-                  color: "var(--background)",
-                  boxShadow: "0 0 30px rgba(255,255,255,0.15)",
-                }}
-              >
-                今すぐ注文する
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-
-          {/* Hero Image */}
-          <div className="order-1 lg:order-2 relative w-full aspect-square max-w-[600px] mx-auto">
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[var(--accent)] to-[#BF5AF2] opacity-20 blur-3xl transform scale-90" />
-            <div className="relative w-full h-full rounded-3xl overflow-hidden glass-panel p-2 shadow-2xl">
-              <img
-                src="/hero_3d_abstract.png"
-                alt="Sophisticated 3D Printed Object"
-                className="w-full h-full object-cover rounded-2xl brightness-110 contrast-125"
-              />
-              <div className="absolute inset-2 rounded-2xl ring-1 ring-inset ring-white/10 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </section>
+      <LayerDivider />
 
       {/* ── Workflow ── */}
-      <section
-        id="how-it-works"
-        className="py-32 px-8 border-t border-[var(--border)] relative"
-      >
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,rgba(41,151,255,0.03),transparent_50%)] pointer-events-none" />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="mb-20 text-center">
-            <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[var(--text-secondary)]">
+      <section id="how-it-works" className="py-28 px-8 relative">
+        <div className="max-w-7xl mx-auto">
+          <Reveal className="mb-16 text-center">
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-3" style={{ color: "var(--text-tertiary)" }}>
               Workflow
             </p>
-            <h2 className="text-[42px] font-bold tracking-tight text-[var(--text-primary)]">
+            <h2
+              className="text-[38px] font-bold"
+              style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+            >
               シームレスな3ステップ
             </h2>
-          </div>
+          </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <StaggerReveal className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {steps.map((step) => (
               <div
                 key={step.number}
-                className="relative p-10 rounded-3xl glass-panel card-lift group"
+                className="relative p-8 rounded-2xl glass-panel card-lift"
               >
-                <div className="absolute top-6 right-8 text-[100px] font-black leading-none pointer-events-none select-none transition-all duration-500 group-hover:scale-110 group-hover:opacity-10 text-white/5">
-                  {step.number}
+                <div className="flex items-center gap-3 mb-7">
+                  <span
+                    className="text-[10px] font-bold tracking-[0.18em] uppercase shrink-0"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    Step {step.number}
+                  </span>
+                  <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
                 </div>
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-8 bg-gradient-to-br from-[var(--accent)] to-[#47A9FF] shadow-[0_0_20px_rgba(41,151,255,0.3)] text-white">
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-6"
+                  style={{ background: "var(--accent-light)", color: "var(--accent)" }}
+                >
                   {step.icon}
                 </div>
-                <div className="text-[11px] font-bold tracking-[0.1em] text-[var(--text-tertiary)] mb-3 uppercase">
-                  Step {step.number}
-                </div>
-                <h3 className="text-[20px] font-bold mb-4 text-[var(--text-primary)]">
+                <h3 className="text-[18px] font-bold mb-3" style={{ color: "var(--text-primary)" }}>
                   {step.title}
                 </h3>
-                <p className="text-[14px] leading-[1.8] text-[var(--text-secondary)]">
+                <p className="text-[14px] leading-[1.8]" style={{ color: "var(--text-secondary)" }}>
                   {step.description}
                 </p>
               </div>
             ))}
-          </div>
+          </StaggerReveal>
         </div>
       </section>
 
-      {/* ── Features & Image Dual Layout ── */}
-      <section
-        id="features"
-        className="py-32 px-8 bg-[#020203] border-t border-[var(--border)] relative overflow-hidden"
-      >
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+      <LayerDivider />
+
+      {/* ── Features & Image ── */}
+      <section id="features" className="py-28 px-8 relative">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* Image */}
-          <div className="relative rounded-3xl overflow-hidden glass-panel p-2 transform -rotate-1 hover:rotate-0 transition-transform duration-700 ease-out card-lift">
-            <img
-              src="/precision_printing.png"
-              alt="Precision 3D Printing Macro"
-              className="w-full h-auto object-cover rounded-2xl brightness-110"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none rounded-3xl" />
-            <div className="absolute bottom-8 left-8 right-8 text-white">
-              <p className="text-[12px] font-bold tracking-widest text-[#47A9FF] mb-2 uppercase">
-                Advanced Tech
-              </p>
-              <p className="text-[24px] font-bold leading-tight">
-                超微細なディテールを
-                <br />
-                完璧に再現するテクノロジー。
-              </p>
+          <Reveal>
+            <div
+              className="relative rounded-2xl overflow-hidden glass-panel p-1.5 card-lift"
+              style={{ transform: "rotate(-0.7deg)" }}
+            >
+              <img
+                src="/precision_printing.png"
+                alt="精密な3Dプリント"
+                className="w-full h-auto object-cover rounded-xl"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none rounded-2xl" />
+              <div className="absolute bottom-7 left-7 right-7">
+                <p className="text-[10px] font-bold tracking-widest mb-2 uppercase" style={{ color: "var(--accent)" }}>
+                  Advanced Tech
+                </p>
+                <p className="text-[20px] font-bold leading-snug text-white">
+                  超微細なディテールを
+                  <br />
+                  完璧に再現するテクノロジー。
+                </p>
+              </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Features Grid */}
           <div>
-            <div className="mb-14">
-              <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[var(--text-secondary)]">
+            <Reveal className="mb-12">
+              <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-3" style={{ color: "var(--text-tertiary)" }}>
                 Features
               </p>
-              <h2 className="text-[42px] font-bold tracking-tight text-[var(--text-primary)]">
+              <h2
+                className="text-[38px] font-bold"
+                style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+              >
                 初心者でも
                 <br />
                 安心して使える
               </h2>
-            </div>
+            </Reveal>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-10">
+            <StaggerReveal className="grid grid-cols-1 sm:grid-cols-2 gap-8" staggerMs={70}>
               {features.map((feat) => (
-                <div key={feat.title} className="group">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[var(--accent)] group-hover:scale-110 transition-transform duration-300">
+                <div key={feat.title}>
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
+                    style={{ background: "var(--accent-light)", color: "var(--accent)" }}
+                  >
                     {feat.icon}
                   </div>
-                  <h3 className="text-[17px] font-bold mb-3 text-[var(--text-primary)]">
+                  <h3 className="text-[16px] font-bold mb-2" style={{ color: "var(--text-primary)" }}>
                     {feat.title}
                   </h3>
-                  <p className="text-[14px] leading-[1.7] text-[var(--text-secondary)]">
+                  <p className="text-[13px] leading-[1.75]" style={{ color: "var(--text-secondary)" }}>
                     {feat.desc}
                   </p>
                 </div>
               ))}
-            </div>
+            </StaggerReveal>
           </div>
         </div>
       </section>
 
+      <LayerDivider />
+
       {/* ── Materials ── */}
-      <section
-        id="materials"
-        className="py-32 px-8 border-t border-[var(--border)] relative hero-bg"
-      >
+      <section id="materials" className="py-28 px-8 relative hero-bg">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+          <Reveal className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
             <div>
-              <p className="text-[12px] font-bold tracking-[0.2em] uppercase mb-4 text-[var(--text-secondary)]">
+              <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-3" style={{ color: "var(--text-tertiary)" }}>
                 Materials
               </p>
-              <h2 className="text-[42px] font-bold tracking-tight text-[var(--text-primary)]">
+              <h2
+                className="text-[38px] font-bold"
+                style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+              >
                 妥協なきマテリアル
               </h2>
             </div>
-            <p className="text-[15px] max-w-[340px] leading-[1.8] text-[var(--text-secondary)]">
+            <p className="text-[14px] max-w-[320px] leading-[1.8]" style={{ color: "var(--text-secondary)" }}>
               プロトタイピングから最終製品まで。あらゆる用途に応える厳選された産業グレード素材をラインナップ。
             </p>
-          </div>
+          </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StaggerReveal className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" staggerMs={65}>
             {materials.map((mat) => (
               <div
                 key={mat.id}
-                className="glass-panel p-8 rounded-3xl card-lift relative overflow-hidden group"
+                className="relative p-7 rounded-2xl overflow-hidden card-lift"
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderLeft: `3px solid ${mat.tagColor}`,
+                }}
               >
-                <div
-                  className="absolute top-0 right-0 w-32 h-32 opacity-20 filter blur-3xl rounded-full transition-opacity duration-500 group-hover:opacity-40"
-                  style={{ background: mat.tagColor }}
-                />
-
-                <div className="flex items-center justify-between mb-6 relative z-10">
-                  <h3 className="text-[22px] font-bold text-[var(--text-primary)]">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="text-[20px] font-bold" style={{ color: "var(--text-primary)" }}>
                     {mat.name}
                   </h3>
                   <span
-                    className="text-[11px] font-bold px-3 py-1.5 rounded-full border border-white/10"
+                    className="text-[11px] font-medium px-2.5 py-1 rounded-full shrink-0 ml-2"
                     style={{
-                      background: "rgba(255,255,255,0.04)",
-                      color: "var(--text-secondary)",
+                      background: "var(--surface-secondary)",
+                      color: "var(--text-tertiary)",
+                      border: "1px solid var(--border)",
                     }}
                   >
                     {mat.method}
                   </span>
                 </div>
-
-                <p className="text-[14px] leading-[1.7] text-[var(--text-secondary)] mb-8 relative z-10 h-[4.5em]">
+                <p className="text-[13px] leading-[1.75] mb-6" style={{ color: "var(--text-secondary)" }}>
                   {mat.desc}
                 </p>
-
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="w-8 h-8 rounded-full border-2 border-[#101016] shadow-md relative overflow-hidden bg-gradient-to-br from-white/20 to-white/5"
-                      />
-                    ))}
-                  </div>
-                  <span className="text-[12px] font-bold text-[var(--accent)]">
-                    {mat.tag}
-                  </span>
-                </div>
+                <span className="text-[12px] font-bold" style={{ color: mat.tagColor }}>
+                  {mat.tag}
+                </span>
               </div>
             ))}
-          </div>
+          </StaggerReveal>
         </div>
       </section>
+
+      <LayerDivider />
 
       {/* ── CTA ── */}
-      <section className="py-40 px-8 relative overflow-hidden bg-[#0A0A0F] border-t border-[rgba(255,255,255,0.04)] text-center">
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] to-transparent pointer-events-none" />
-
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-[var(--accent-light)] text-[var(--accent)] mb-10 shadow-[0_0_50px_rgba(41,151,255,0.2)] border border-[rgba(41,151,255,0.2)]">
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-              <line x1="12" y1="22.08" x2="12" y2="12" />
-            </svg>
-          </div>
-          <h2 className="text-[48px] lg:text-[56px] font-black mb-8 leading-[1.1] tracking-tight">
-            まずは、気軽に。
-          </h2>
-          <p className="text-[18px] text-[var(--text-secondary)] mb-12 font-light">
-            アカウント登録は不要です。
-            <br />
-            3Dファイルをアップロードして、最短3日でお届けします。
-          </p>
-          <Link
-            href="/order"
-            className="inline-flex items-center gap-3 px-10 py-5 rounded-2xl text-[16px] font-bold text-white transition-all hover:scale-105"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--accent) 0%, #BF5AF2 100%)",
-              boxShadow: "0 20px 40px -10px rgba(191,90,242,0.4)",
-            }}
-          >
-            注文を始める
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="5" y1="12" x2="19" y2="12" />
-              <polyline points="12 5 19 12 12 19" />
-            </svg>
-          </Link>
-        </div>
-      </section>
+      <Reveal className="py-36 px-8 relative text-center">
+        <p
+          className="text-[11px] font-bold tracking-[0.2em] uppercase mb-6"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          Get Started
+        </p>
+        <h2
+          className="text-[48px] lg:text-[60px] font-bold mb-7 leading-[1.1]"
+          style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}
+        >
+          まずは、気軽に。
+        </h2>
+        <p className="text-[16px] mb-12 font-light leading-[1.8]" style={{ color: "var(--text-secondary)" }}>
+          アカウント登録は不要です。
+          <br />
+          3Dファイルをアップロードして、最短3日でお届けします。
+        </p>
+        <Link
+          href="/order"
+          className="inline-flex items-center gap-3 px-10 py-5 rounded-xl text-[15px] font-bold text-white transition-all hover:opacity-90 hover:-translate-y-0.5 active:translate-y-0"
+          style={{ background: "var(--accent)" }}
+        >
+          注文を始める
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </Link>
+      </Reveal>
 
       {/* ── Footer ── */}
-      <footer className="py-12 px-8 bg-[#000] border-t border-[rgba(255,255,255,0.06)] relative z-10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <span className="text-[15px] font-bold text-white tracking-widest">
-              大國造形
-            </span>
-          </div>
-          <p className="text-[13px] text-[var(--text-tertiary)]">
+      <footer className="py-10 px-8" style={{ borderTop: "1px solid var(--border-light)", background: "#000" }}>
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <span className="text-[14px] font-bold tracking-widest" style={{ color: "var(--text-primary)" }}>
+            大國造形
+          </span>
+          <p className="text-[12px]" style={{ color: "var(--text-tertiary)" }}>
             © 2026 大國造形. All rights reserved.
           </p>
         </div>

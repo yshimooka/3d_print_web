@@ -72,8 +72,8 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
           background: isDragging ? 'var(--accent-light)' : 'var(--surface)',
           border: `1.5px solid ${isDragging ? 'var(--accent)' : 'var(--border)'}`,
           boxShadow: isDragging
-            ? '0 0 0 4px rgba(0, 113, 227, 0.1)'
-            : '0 1px 3px rgba(0, 0, 0, 0.04)',
+            ? '0 0 0 4px rgba(212, 112, 42, 0.12)'
+            : 'none',
           transform: isDragging ? 'scale(1.01)' : 'scale(1)',
         }}
       >
@@ -103,13 +103,11 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
 
         {/* CTA */}
         <button
-          className="text-[13px] font-medium px-5 py-2 rounded-lg transition-all duration-200 cursor-pointer"
+          className="text-[13px] font-semibold px-5 py-2 rounded-lg transition-all duration-200 cursor-pointer hover:opacity-90"
           style={{
             background: 'var(--accent)',
             color: '#FFFFFF',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-hover)')}
-          onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--accent)')}
         >
           ファイルを選択
         </button>

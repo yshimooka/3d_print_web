@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #05050a;
-  --foreground: #f5f5f7;
-  --surface: rgba(20, 20, 28, 0.4);
-  --surface-secondary: rgba(30, 30, 42, 0.5);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.04);
-  --text-primary: #ffffff;
-  --text-secondary: #90909a;
-  --text-tertiary: #6e6e7a;
-  --accent: #2997ff;
-  --accent-hover: #47a9ff;
-  --accent-light: rgba(41, 151, 255, 0.12);
-  --success: #32d74b;
-  --canvas-bg: #030305;
+  --background: #0A0908;
+  --foreground: #F2EDE8;
+  --surface: rgba(22, 20, 18, 0.5);
+  --surface-secondary: rgba(30, 28, 26, 0.65);
+  --border: rgba(242, 237, 232, 0.08);
+  --border-light: rgba(242, 237, 232, 0.04);
+  --text-primary: #F2EDE8;
+  --text-secondary: #8A8480;
+  --text-tertiary: #5C5A58;
+  /* Burnt copper — kiln/forge/resin printer resonance, distinct from default blue */
+  --accent: #D4702A;
+  --accent-hover: #E0803A;
+  --accent-light: rgba(212, 112, 42, 0.12);
+  --success: #5BA85A;
+  --canvas-bg: #070706;
 }
 
 @theme inline {
@@ -34,22 +35,20 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Hero background dot grid ─── */
+/* ─── Hero background: CAD graph-paper grid ─── */
 .hero-bg {
   background-color: var(--canvas-bg);
-  background-image: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.04) 1px,
-    transparent 1px
-  );
-  background-size: 32px 32px;
+  background-image:
+    linear-gradient(rgba(242, 237, 232, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(242, 237, 232, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
 /* ─── Glass Panel Utility ─── */
 .glass-panel {
   background: var(--surface);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border);
 }
 
@@ -63,10 +62,22 @@ html {
 .card-lift:hover {
   transform: translateY(-4px);
   box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.4),
-    0 0 40px rgba(41, 151, 255, 0.1) inset;
-  border-color: rgba(255, 255, 255, 0.15);
+    0 16px 40px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(212, 112, 42, 0.06) inset;
+  border-color: rgba(242, 237, 232, 0.14);
 }
+
+/* ─── Layer-lines divider (evokes FDM 3D print layers) ─── */
+.layer-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  pointer-events: none;
+  width: 100%;
+}
+.layer-lines > span:nth-child(1) { display: block; height: 0.5px; width: 100%; background: var(--border); }
+.layer-lines > span:nth-child(2) { display: block; height: 0.5px; width: 66%;  background: var(--border-light); }
+.layer-lines > span:nth-child(3) { display: block; height: 0.5px; width: 33%;  background: var(--border-light); }
 
 body {
   background: var(--background);
@@ -85,7 +96,7 @@ body {
 
 /* Selection */
 ::selection {
-  background: rgba(41, 151, 255, 0.25);
+  background: rgba(212, 112, 42, 0.3);
   color: #fff;
 }
 
@@ -97,11 +108,21 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(242, 237, 232, 0.12);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(242, 237, 232, 0.25);
+}
+
+/* ─── Entrance animation initial states ─── */
+/* CSS sets initial hidden state so there's no JS-hydration flash.
+   [data-entrance]: hero text, Reveal wrappers.
+   [data-stagger] > *: StaggerReveal children. */
+[data-entrance],
+[data-stagger] > * {
+  opacity: 0;
+  transform: translateY(24px);
 }
 
 /* Number input spinners removed globally */
