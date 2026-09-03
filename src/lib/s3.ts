@@ -1,6 +1,6 @@
 // 3Dデータ本体をAmazon S3に保存する。
 // Notionには直接ファイルを置かず、S3に保存した上でダウンロード用の署名付きURLをリンクする。
-// 環境変数(AWS_REGION, AWS_S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)が
+// 環境変数(S3_REGION, S3_BUCKET_NAME, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY)が
 // 未設定の場合は何もしない(通常の注文フローは阻害しない)。
 //
 // バケットは非公開(Block Public Access有効)のまま運用し、
@@ -9,12 +9,12 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const REGION = process.env.AWS_REGION;
-const BUCKET = process.env.AWS_S3_BUCKET;
+const REGION = process.env.S3_REGION;
+const BUCKET = process.env.S3_BUCKET_NAME;
 
 function isS3Configured(): boolean {
   return Boolean(
-    REGION && BUCKET && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+    REGION && BUCKET && process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY
   );
 }
 
