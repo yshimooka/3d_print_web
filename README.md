@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 大國造形 — かんたん3Dプリントサービス
 
-## Getting Started
+日本の3D初心者向け3Dプリント受注サイト。3Dデータをアップロードするだけで総額がその場でわかり、検品済みの造形物が届くサービスの MVP 実装です。
 
-First, run the development server:
+サービス設計の全体像は [docs/SERVICE_DESIGN.md](docs/SERVICE_DESIGN.md) を参照してください(ポジショニング・料金設計・オペレーション・ロードマップ)。
+
+## 起動
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev   # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 画面構成
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| パス | 内容 |
+| --- | --- |
+| `/` | トップ(価値訴求・3ステップ・素材・料金例・納期の説明) |
+| `/order` | 注文フロー: アップロード → 3Dプレビュー+自動チェック → 素材3プリセット選択 → 即時見積もり → 住所入力 → 注文確定 |
+| `/pricing` `/faq` | 料金の仕組み / よくある質問 |
+| `/legal/{terms,privacy,tokushoho}` | 利用規約 / プライバシーポリシー / 特商法表記(※事業者情報は要記入) |
+| `/admin` | 受注一覧とステータス更新(最小限)。`ADMIN_TOKEN` 環境変数を設定すると簡易認証が有効 |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 仕組み
 
-## Learn More
+- **見積もり** ([src/lib/quote.ts](src/lib/quote.ts)): アップロードされたメッシュの実体積(符号付き四面体和)から `体積 × 素材単価(最低価格あり) + 基本手数料500円 + 送料500円(5,000円以上無料)` を税込計算。サイズ超過は注文不可として弾く。価格はサーバー側([api/orders](src/app/api/orders/route.ts))でも再計算し、クライアント申告値を信用しない。
+- **素材** ([src/data/materials.ts](src/data/materials.ts)): 初心者向けに「スタンダード樹脂 / 高精細レジン / タフナイロン」の3プリセットのみ。
+- **受注** ([src/lib/orders.ts](src/lib/orders.ts)): MVPではファイルベース(`data/orders.json` + `data/uploads/`、gitignore済み)。本番はDBへ置き換え。
+- **ステータス**: 設計書5.2の6段階(注文確定→データチェック→製造中→輸送中→検品完了・発送→お届け完了)。
 
-To learn more about Next.js, take a look at the following resources:
+## MVP未実装(設計書 Phase 1 の残り)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Stripe決済(現在は「プレオープン中につき請求なし」のモック)
+- 注文確認・進捗通知メール
+- JLC3DPへの発注は手動運用

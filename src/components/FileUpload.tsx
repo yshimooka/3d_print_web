@@ -1,15 +1,35 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { ArrowUpFromLine } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { ArrowRight, FileUp, Info } from "lucide-react";
 
 interface FileUploadProps {
   onUpload: (file: File) => void;
 }
 
+const ACCEPTED_EXTENSIONS = ["stl", "obj", "gltf", "glb", "stp", "step"];
+
+function isSupported(file: File) {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return Boolean(extension && ACCEPTED_EXTENSIONS.includes(extension));
+}
+
 export default function FileUpload({ onUpload }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const submitFile = useCallback(
+    (file: File) => {
+      if (!isSupported(file)) {
+        setError("対応している形式は STL / OBJ / GLTF / GLB / STEP です。");
+        return;
+      }
+      setError(null);
+      onUpload(file);
+    },
+    [onUpload]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -25,93 +45,68 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragging(false);
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        onUpload(e.dataTransfer.files[0]);
-      }
+      const droppedFile = e.dataTransfer.files?.[0];
+      if (droppedFile) submitFile(droppedFile);
     },
-    [onUpload]
+    [submitFile]
   );
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files.length > 0) {
-        onUpload(e.target.files[0]);
-      }
+      const selectedFile = e.target.files?.[0];
+      if (selectedFile) submitFile(selectedFile);
     },
-    [onUpload]
+    [submitFile]
   );
 
   return (
-    <div className="w-full max-w-[520px] mx-auto flex flex-col items-center px-6">
-      {/* Heading */}
-      <div className="text-center mb-10">
-        <h2
-          className="text-[32px] font-semibold tracking-[-0.02em] leading-[1.15] mb-3"
-          style={{ color: 'var(--text-primary)' }}
-        >
+    <div className="mx-auto flex w-full max-w-[640px] flex-col items-center px-5">
+      <div className="mb-8 text-center">
+        <p className="mb-3 text-[13px] font-bold" style={{ color: "var(--accent)" }}>
+          Step 1
+        </p>
+        <h1 className="mb-4 text-[34px] font-bold leading-[1.2] sm:text-[44px]" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>
           3Dファイルをアップロード
-        </h2>
-        <p
-          className="text-[15px] leading-relaxed"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          AIで作った3Dファイルをそのまま使えます。
-          <br />
-          アップロードするだけで注文できます。
+        </h1>
+        <p className="mx-auto max-w-[520px] text-[15px] leading-[1.85]" style={{ color: "var(--text-secondary)" }}>
+          ファイルを置くと、サイズと体積を確認して見積もりを計算します。
+          見積もりまでは無料、会員登録も不要です。
         </p>
       </div>
 
-      {/* Drop Zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className="w-full flex flex-col items-center justify-center py-16 px-8 text-center rounded-2xl transition-all duration-300 cursor-pointer"
+        className="w-full cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-all duration-200 sm:p-8"
         style={{
-          background: isDragging ? 'var(--accent-light)' : 'var(--surface)',
-          border: `1.5px solid ${isDragging ? 'var(--accent)' : 'var(--border)'}`,
-          boxShadow: isDragging
-            ? '0 0 0 4px rgba(212, 112, 42, 0.12)'
-            : 'none',
-          transform: isDragging ? 'scale(1.01)' : 'scale(1)',
+          background: isDragging ? "var(--accent-light)" : "rgba(255,255,255,0.86)",
+          borderColor: isDragging ? "var(--accent)" : "var(--border)",
+          boxShadow: isDragging ? "0 0 0 6px rgba(200, 107, 58, 0.1)" : "var(--shadow-card)",
+          transform: isDragging ? "translateY(-2px)" : "translateY(0)",
         }}
       >
-        {/* Icon */}
         <div
-          className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-colors duration-200"
-          style={{
-            background: isDragging ? 'var(--accent)' : 'var(--surface-secondary)',
-            color: isDragging ? '#FFFFFF' : 'var(--text-secondary)',
-          }}
+          className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-lg"
+          style={{ background: isDragging ? "var(--accent)" : "var(--surface-secondary)", color: isDragging ? "#fff" : "var(--accent)" }}
         >
-          <ArrowUpFromLine size={22} strokeWidth={1.8} />
+          <FileUp size={26} strokeWidth={1.8} />
         </div>
-
-        <p
-          className="text-[15px] font-medium mb-1.5"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          {isDragging ? "ドロップしてアップロード" : "ファイルをドラッグ＆ドロップ"}
+        <p className="mb-2 text-[17px] font-bold" style={{ color: "var(--text-primary)" }}>
+          {isDragging ? "ここにドロップしてください" : "ファイルをドラッグ、または選択"}
         </p>
-        <p
-          className="text-[13px] mb-6"
-          style={{ color: 'var(--text-tertiary)' }}
-        >
-          STL, OBJ, GLTF, STEP に対応
+        <p className="mb-6 text-[13px]" style={{ color: "var(--text-secondary)" }}>
+          STL / OBJ / GLTF / GLB / STEP に対応
         </p>
-
-        {/* CTA */}
         <button
-          className="text-[13px] font-semibold px-5 py-2 rounded-lg transition-all duration-200 cursor-pointer hover:opacity-90"
-          style={{
-            background: 'var(--accent)',
-            color: '#FFFFFF',
-          }}
+          type="button"
+          className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-[14px] font-bold text-white transition-all duration-200"
+          style={{ background: "var(--accent)" }}
         >
           ファイルを選択
+          <ArrowRight size={16} strokeWidth={2} />
         </button>
-
         <input
           ref={fileInputRef}
           type="file"
@@ -121,13 +116,18 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
         />
       </div>
 
-      {/* Footer note */}
-      <p
-        className="mt-4 text-[12px] text-center"
-        style={{ color: 'var(--text-tertiary)' }}
-      >
-        STL / OBJ / GLTF / STEP 形式に対応しています
-      </p>
+      {error && (
+        <p className="mt-4 rounded-lg px-4 py-3 text-[13px] font-semibold" style={{ background: "var(--danger-light)", color: "var(--danger)" }}>
+          {error}
+        </p>
+      )}
+
+      <div className="mt-5 flex items-start gap-2 rounded-lg px-4 py-3" style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}>
+        <Info size={16} strokeWidth={1.8} className="mt-0.5 shrink-0" />
+        <p className="text-[12px] leading-[1.7]">
+          ファイルは見積もりと注文確認にだけ使用します。注文前に決済は発生しません。
+        </p>
+      </div>
     </div>
   );
 }

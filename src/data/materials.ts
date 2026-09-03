@@ -18,11 +18,17 @@ export interface Material {
   id: string;
   name: string;
   nameJa: string;
+  /** カードに出す一言(向いている用途) */
   description: string;
   details: string;
   image: string;
   colors: MaterialColor[];
+  /** 税込・1cm³あたりの造形価格 */
   pricePerCm3: number;
+  /** 1個あたりの最低造形価格(税込) */
+  minPrice: number;
+  /** 造形可能な最大サイズ mm(長辺順) */
+  maxSizeMm: [number, number, number];
   features: string[];
   icon: string;
   method: string;
@@ -31,149 +37,61 @@ export interface Material {
   renderProps: MaterialRenderProps;
 }
 
+// 設計書 6.2: 初心者向けに選択肢は3プリセットに絞る。
+// スタンダード / 高精細 / タフ の軸で、それぞれ代表的な工法を割り当てる。
+
 export const materials: Material[] = [
   {
-    id: "pla",
-    name: "PLA",
-    nameJa: "PLA樹脂",
-    description: "最もポピュラーな素材。環境にやさしく、精度の高い仕上がり。",
-    details: "植物由来のエコなプラスチックです。色の発色がよく滑らかな仕上がりが特徴。フィギュアや置き物、試作品など幅広い用途に使えます。はじめての方にもっともおすすめの素材です。",
+    id: "standard",
+    name: "Standard Resin",
+    nameJa: "スタンダード樹脂",
+    description: "試作品や実用品に。いちばん手頃な定番素材。",
+    details:
+      "光造形(SLA)の標準レジンです。表面がなめらかで、細かい形もきれいに再現できます。小物・試作品・日用品のパーツなど、迷ったらまずこの素材がおすすめです。",
     image: "/materials/pla.png",
     colors: [
+      { name: "グレー", hex: "#9CA3AF" },
       { name: "ホワイト", hex: "#F5F5F5" },
       { name: "ブラック", hex: "#1a1a1a" },
-      { name: "レッド", hex: "#EF4444" },
-      { name: "ブルー", hex: "#3B82F6" },
-      { name: "グリーン", hex: "#22C55E" },
-      { name: "イエロー", hex: "#EAB308" },
-      { name: "オレンジ", hex: "#F97316" },
-      { name: "グレー", hex: "#6B7280" },
     ],
-    pricePerCm3: 30,
-    features: ["高精度", "環境にやさしい", "初心者向け"],
-    icon: "🌿",
-    method: "FDM（熱溶解積層）",
-    layerHeight: "0.1 〜 0.3mm",
-    tolerance: "±0.3mm",
+    pricePerCm3: 180,
+    minPrice: 800,
+    maxSizeMm: [200, 200, 200],
+    features: ["いちばん手頃", "なめらかな表面", "迷ったらこれ"],
+    icon: "🧩",
+    method: "光造形（SLA）",
+    layerHeight: "0.05 〜 0.1mm",
+    tolerance: "±0.2mm",
     renderProps: {
-      roughness: 0.55,
+      roughness: 0.35,
       metalness: 0.0,
-      clearcoat: 0.1,
-      clearcoatRoughness: 0.8,
-      transmission: 0,
-      opacity: 1,
-      envMapIntensity: 0.5,
-      ior: 1.45,
-    },
-  },
-  {
-    id: "abs",
-    name: "ABS",
-    nameJa: "ABS樹脂",
-    description: "耐衝撃性・耐熱性に優れた汎用プラスチック。",
-    details: "LEGOブロックと同じ種類のプラスチックです。丈夫で熱にも強く、実際に使う部品を作るのに向いています。研磨や塗装で表面を仕上げることもできます。",
-    image: "/materials/abs.png",
-    colors: [
-      { name: "ホワイト", hex: "#F5F5F5" },
-      { name: "ブラック", hex: "#1a1a1a" },
-      { name: "レッド", hex: "#DC2626" },
-      { name: "ブルー", hex: "#2563EB" },
-      { name: "グレー", hex: "#6B7280" },
-    ],
-    pricePerCm3: 35,
-    features: ["高耐久", "耐熱性", "後加工しやすい"],
-    icon: "🔧",
-    method: "FDM（熱溶解積層）",
-    layerHeight: "0.1 〜 0.3mm",
-    tolerance: "±0.3mm",
-    renderProps: {
-      roughness: 0.45,
-      metalness: 0.0,
-      clearcoat: 0.2,
-      clearcoatRoughness: 0.6,
+      clearcoat: 0.3,
+      clearcoatRoughness: 0.4,
       transmission: 0,
       opacity: 1,
       envMapIntensity: 0.6,
-      ior: 1.45,
+      ior: 1.5,
     },
   },
   {
-    id: "petg",
-    name: "PETG",
-    nameJa: "PETG樹脂",
-    description: "透明性が高く、食品安全基準にも対応。",
-    details: "ペットボトルと同じ種類のプラスチックです。透明感があり水や薬品にも強い素材。透明なカバーやケース、容器などに適しています。",
-    image: "/materials/petg.png",
-    colors: [
-      { name: "クリア", hex: "#E0F2FE" },
-      { name: "ホワイト", hex: "#F5F5F5" },
-      { name: "ブラック", hex: "#1a1a1a" },
-      { name: "ブルー", hex: "#60A5FA" },
-      { name: "グリーン", hex: "#4ADE80" },
-    ],
-    pricePerCm3: 40,
-    features: ["透明性", "耐薬品性", "食品安全"],
-    icon: "💎",
-    method: "FDM（熱溶解積層）",
-    layerHeight: "0.1 〜 0.3mm",
-    tolerance: "±0.3mm",
-    renderProps: {
-      roughness: 0.15,
-      metalness: 0.0,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.1,
-      transmission: 0.6,
-      opacity: 0.85,
-      envMapIntensity: 1.0,
-      ior: 1.57,
-    },
-  },
-  {
-    id: "nylon",
-    name: "Nylon",
-    nameJa: "ナイロン",
-    description: "高い強度と柔軟性を持つエンジニアリング素材。",
-    details: "軽くて丈夫なナイロン素材です。多少の力が加わっても折れにくく、複雑な形状も作れます。動く部品や強度が必要なパーツに向いています。",
-    image: "/materials/nylon.png",
-    colors: [
-      { name: "ナチュラル", hex: "#FEF3C7" },
-      { name: "ホワイト", hex: "#F5F5F5" },
-      { name: "ブラック", hex: "#1a1a1a" },
-    ],
-    pricePerCm3: 80,
-    features: ["高強度", "柔軟性", "耐摩耗性"],
-    icon: "⚡",
-    method: "SLS（選択的レーザー焼結）",
-    layerHeight: "0.1mm",
-    tolerance: "±0.2mm",
-    renderProps: {
-      roughness: 0.7,
-      metalness: 0.0,
-      clearcoat: 0.0,
-      clearcoatRoughness: 1.0,
-      transmission: 0,
-      opacity: 1,
-      envMapIntensity: 0.4,
-      ior: 1.45,
-    },
-  },
-  {
-    id: "resin",
-    name: "Resin",
-    nameJa: "レジン（光造形）",
-    description: "超高精度。フィギュアやジュエリー原型に。",
-    details: "光で固める樹脂素材で、非常に細かい部分まで忠実に再現できます。表面がなめらかで美しい仕上がりが特徴。フィギュアやアクセサリーの原型制作に最適です。",
+    id: "fine",
+    name: "Fine Resin",
+    nameJa: "高精細レジン",
+    description: "フィギュア・ミニチュアに。積層痕が目立たない美しい仕上がり。",
+    details:
+      "高解像度の光造形レジンです。髪の毛や布のしわのような微細なディテールまで忠実に再現でき、表面はつるりとなめらか。フィギュア、ミニチュア、アクセサリーの原型に最適です。",
     image: "/materials/resin.png",
     colors: [
       { name: "グレー", hex: "#9CA3AF" },
       { name: "ホワイト", hex: "#F5F5F5" },
       { name: "クリア", hex: "#DBEAFE" },
-      { name: "ブラック", hex: "#1a1a1a" },
     ],
-    pricePerCm3: 100,
-    features: ["超高精度", "滑らかな表面", "微細造形"],
+    pricePerCm3: 280,
+    minPrice: 1200,
+    maxSizeMm: [180, 180, 180],
+    features: ["超高精細", "フィギュア向き", "塗装しやすい"],
     icon: "✨",
-    method: "SLA / DLP（光造形）",
+    method: "高解像度光造形（SLA 8K）",
     layerHeight: "0.025 〜 0.05mm",
     tolerance: "±0.1mm",
     renderProps: {
@@ -188,31 +106,38 @@ export const materials: Material[] = [
     },
   },
   {
-    id: "metal",
-    name: "Metal",
-    nameJa: "メタル（チタン合金）",
-    description: "航空宇宙・医療グレードの金属素材。",
-    details: "金属そのものを3Dプリントした素材です。非常に強く錆びにくいチタン合金を使用。高い強度や本物の金属の質感が求められる部品に向いています。",
-    image: "/materials/metal.png",
+    id: "tough",
+    name: "Tough Nylon",
+    nameJa: "タフナイロン",
+    description: "動く部品・力のかかるパーツに。折れにくく実用強度。",
+    details:
+      "粉末焼結(MJF/SLS)のナイロン素材です。薄くても割れにくく、ヒンジやスナップフィットのような動く構造も作れます。実際に使う部品、屋外で使うもの、強度が必要なパーツにおすすめです。",
+    image: "/materials/nylon.png",
     colors: [
-      { name: "シルバー", hex: "#C0C0C0" },
-      { name: "チタングレー", hex: "#8B8B8B" },
+      { name: "ナチュラルグレー", hex: "#8A8480" },
+      { name: "ブラック（染色）", hex: "#1a1a1a" },
     ],
-    pricePerCm3: 500,
-    features: ["最高強度", "耐腐食性", "軽量"],
-    icon: "🛡️",
-    method: "DMLS（金属レーザー焼結）",
-    layerHeight: "0.02 〜 0.06mm",
-    tolerance: "±0.1mm",
+    pricePerCm3: 350,
+    minPrice: 1500,
+    maxSizeMm: [280, 280, 280],
+    features: ["高強度", "割れにくい", "実用部品向き"],
+    icon: "⚙️",
+    method: "粉末焼結（MJF / SLS）",
+    layerHeight: "0.08 〜 0.1mm",
+    tolerance: "±0.3%（最小±0.3mm）",
     renderProps: {
-      roughness: 0.25,
-      metalness: 0.95,
-      clearcoat: 0.3,
-      clearcoatRoughness: 0.2,
+      roughness: 0.7,
+      metalness: 0.0,
+      clearcoat: 0.0,
+      clearcoatRoughness: 1.0,
       transmission: 0,
       opacity: 1,
-      envMapIntensity: 1.5,
-      ior: 2.5,
+      envMapIntensity: 0.4,
+      ior: 1.45,
     },
   },
 ];
+
+export function findMaterial(id: string): Material | undefined {
+  return materials.find((m) => m.id === id);
+}

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import Link from "next/link";
 import * as THREE from "three";
+import { CheckCircle2, PackageCheck, RotateCcw } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
 import CADViewer from "@/components/CADViewer";
 import MaterialSelector from "@/components/MaterialSelector";
@@ -9,6 +11,7 @@ import AnalysisPanel from "@/components/AnalysisPanel";
 import CheckoutForm from "@/components/CheckoutForm";
 import { type Material, type MaterialColor } from "@/data/materials";
 import { analyzeGeometry, type AnalysisResult } from "@/utils/printAnalysis";
+import { computeMeshStats, computeQuote, type MeshStats } from "@/lib/quote";
 
 export default function OrderPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -18,6 +21,7 @@ export default function OrderPage() {
 
   // Analysis state
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [meshStats, setMeshStats] = useState<MeshStats | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -25,6 +29,7 @@ export default function OrderPage() {
   const handleFileUpload = (uploadedFile: File) => {
     setFile(uploadedFile);
     setAnalysisResult(null);
+    setMeshStats(null);
     setShowOverlay(false);
   };
 
@@ -34,6 +39,7 @@ export default function OrderPage() {
     setSelectedColor(null);
     setQuantity(1);
     setAnalysisResult(null);
+    setMeshStats(null);
     setShowOverlay(false);
   };
 
@@ -41,6 +47,7 @@ export default function OrderPage() {
     setIsAnalyzing(true);
     setTimeout(() => {
       try {
+        setMeshStats(computeMeshStats(model));
         const result = analyzeGeometry(model);
         setAnalysisResult(result);
         // Auto-show overlay if issues found
@@ -58,6 +65,11 @@ export default function OrderPage() {
     setShowOverlay((prev) => !prev);
   }, []);
 
+  const quote = useMemo(() => {
+    if (!selectedMaterial || !meshStats) return null;
+    return computeQuote(selectedMaterial.id, meshStats, quantity);
+  }, [selectedMaterial, meshStats, quantity]);
+
   const handleSubmit = () => {
     setShowCheckout(true);
   };
@@ -66,74 +78,86 @@ export default function OrderPage() {
     setShowCheckout(false);
   };
 
-  const estimatedPrice = selectedMaterial
-    ? selectedMaterial.pricePerCm3 * 10 * quantity
-    : 0;
-
   // ─── Checkout Page ─────────────────────
-  if (showCheckout && file && selectedMaterial && selectedColor) {
+  if (showCheckout && file && selectedMaterial && selectedColor && meshStats && quote) {
     return (
       <CheckoutForm
-        fileName={file.name}
+        file={file}
         material={selectedMaterial}
         color={selectedColor}
         quantity={quantity}
-        estimatedPrice={estimatedPrice}
+        stats={meshStats}
+        quote={quote}
         onBack={handleBackFromCheckout}
       />
     );
   }
 
   return (
-    <main className="h-screen w-screen flex flex-col overflow-hidden" style={{ background: 'var(--background)' }}>
-      {/* Header */}
-      <header
-        className="shrink-0 h-[52px] px-6 flex items-center justify-between"
-        style={{ borderBottom: '1px solid var(--border)' }}
-      >
-        <div className="flex items-center gap-5">
-          <a
-            href="/"
-            className="text-[15px] font-semibold tracking-[-0.01em] hover:opacity-70 transition-opacity"
-            style={{ color: 'var(--text-primary)', textDecoration: 'none' }}
-          >
-            大國造形
-          </a>
-          {file && (
-            <div className="h-4" style={{ borderLeft: '1px solid var(--border)' }} />
-          )}
-          {file && (
-            <span
-              className="text-[13px] truncate max-w-[240px]"
-              style={{ color: 'var(--text-secondary)' }}
+    <main className="flex min-h-screen flex-col" style={{ background: "var(--background)" }}>
+      <header className="shrink-0 border-b" style={{ background: "rgba(247,246,242,0.9)", borderColor: "var(--border-light)", backdropFilter: "blur(16px)" }}>
+        <div className="mx-auto flex h-[68px] w-full max-w-[1500px] items-center justify-between px-5">
+          <div className="flex min-w-0 items-center gap-4">
+            <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-75" style={{ textDecoration: "none" }}>
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: "var(--accent)", color: "#fff" }}>
+                <PackageCheck size={18} strokeWidth={2} />
+              </span>
+              <span className="text-[15px] font-bold" style={{ color: "var(--text-primary)" }}>
+                大國造形
+              </span>
+            </Link>
+            {file && (
+              <>
+                <span className="hidden h-5 w-px sm:block" style={{ background: "var(--border)" }} />
+                <span className="truncate text-[13px] font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  {file.name}
+                </span>
+              </>
+            )}
+          </div>
+
+          {file ? (
+            <button
+              onClick={clearFile}
+              className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-bold transition-colors hover:bg-[var(--accent-light)]"
+              style={{ color: "var(--accent)" }}
             >
-              {file.name}
-            </span>
+              <RotateCcw size={15} strokeWidth={2} />
+              新しいファイル
+            </button>
+          ) : (
+            <div className="hidden items-center gap-2 text-[12px] font-semibold sm:flex" style={{ color: "var(--text-secondary)" }}>
+              <CheckCircle2 size={16} strokeWidth={1.8} style={{ color: "var(--success)" }} />
+              見積もりまでは無料
+            </div>
           )}
         </div>
-        {file && (
-          <button
-            onClick={clearFile}
-            className="text-[13px] font-medium px-3 py-1 rounded-md transition-colors cursor-pointer"
-            style={{ color: 'var(--accent)', background: 'transparent' }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-light)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-          >
-            新しいファイル
-          </button>
-        )}
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {!file ? (
-          <div className="flex-1 flex items-center justify-center">
-            <FileUpload onUpload={handleFileUpload} />
-          </div>
-        ) : (
-          <>
-            {/* 3D Viewer */}
-            <div className="flex-1 relative" style={{ background: 'var(--canvas-bg)' }}>
+      {!file ? (
+        <section className="flex flex-1 items-center justify-center px-4 py-14">
+          <FileUpload onUpload={handleFileUpload} />
+        </section>
+      ) : (
+        <section className="mx-auto grid w-full max-w-[1500px] flex-1 grid-cols-1 gap-4 p-4 lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_400px]">
+          <div className="flex min-h-[520px] flex-col overflow-hidden rounded-lg border lg:min-h-0" style={{ background: "var(--surface)", borderColor: "var(--border-light)", boxShadow: "var(--shadow-card)" }}>
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b px-4 py-3" style={{ borderColor: "var(--border-light)" }}>
+              <div>
+                <p className="text-[12px] font-bold" style={{ color: "var(--accent)" }}>
+                  3Dプレビュー
+                </p>
+                <p className="text-[13px]" style={{ color: "var(--text-secondary)" }}>
+                  回転・拡大しながら形状を確認できます。
+                </p>
+              </div>
+              {meshStats && (
+                <div className="rounded-lg px-3 py-2 text-[12px] font-semibold" style={{ background: "var(--surface-secondary)", color: "var(--text-primary)" }}>
+                  {meshStats.bboxMm.x.toFixed(0)} × {meshStats.bboxMm.y.toFixed(0)} × {meshStats.bboxMm.z.toFixed(0)} mm / {meshStats.volumeCm3.toFixed(1)} cm³
+                </div>
+              )}
+            </div>
+
+            <div className="relative flex-1 overflow-hidden" style={{ background: "var(--canvas-bg)" }}>
               <CADViewer
                 file={file}
                 colorHex={selectedColor?.hex}
@@ -143,73 +167,50 @@ export default function OrderPage() {
                 analysisResult={analysisResult}
               />
 
-              {/* Floating segmented toggle on the viewer */}
               {analysisResult && analysisResult.issues.length > 0 && (
-                <div
-                  className="absolute top-4 left-4 z-10 flex rounded-lg p-0.5"
-                  style={{
-                    background: 'rgba(255,255,255,0.85)',
-                    backdropFilter: 'blur(12px)',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)',
-                  }}
-                >
+                <div className="absolute left-4 top-4 z-10 flex rounded-lg border p-1" style={{ background: "rgba(255,255,255,0.9)", borderColor: "var(--border-light)", backdropFilter: "blur(12px)" }}>
                   <button
                     onClick={() => setShowOverlay(false)}
-                    className="px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all duration-200 cursor-pointer"
-                    style={{
-                      background: !showOverlay ? '#FFFFFF' : 'transparent',
-                      color: !showOverlay ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                      boxShadow: !showOverlay ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                    }}
+                    className="rounded-lg px-3 py-2 text-[12px] font-bold transition-all"
+                    style={{ background: !showOverlay ? "var(--text-primary)" : "transparent", color: !showOverlay ? "#fff" : "var(--text-secondary)" }}
                   >
                     プレビュー
                   </button>
                   <button
                     onClick={() => setShowOverlay(true)}
-                    className="px-3.5 py-1.5 rounded-md text-[12px] font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5"
-                    style={{
-                      background: showOverlay ? '#FFFFFF' : 'transparent',
-                      color: showOverlay ? '#EF4444' : 'var(--text-tertiary)',
-                      boxShadow: showOverlay ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                    }}
+                    className="rounded-lg px-3 py-2 text-[12px] font-bold transition-all"
+                    style={{ background: showOverlay ? "var(--danger)" : "transparent", color: showOverlay ? "#fff" : "var(--text-secondary)" }}
                   >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ background: showOverlay ? '#EF4444' : 'var(--text-tertiary)' }}
-                    />
                     問題箇所
                   </button>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Divider */}
-            <div style={{ width: '1px', background: 'var(--border)' }} />
-
-            {/* Right Panel */}
-            <div className="w-[360px] shrink-0 flex flex-col overflow-hidden" style={{ background: 'var(--surface)' }}>
-              <MaterialSelector
-                selectedMaterial={selectedMaterial}
-                selectedColor={selectedColor}
-                quantity={quantity}
-                onMaterialChange={setSelectedMaterial}
-                onColorChange={setSelectedColor}
-                onQuantityChange={setQuantity}
-                onSubmit={handleSubmit}
-                fileName={file.name}
-                analysisPanel={
-                  <AnalysisPanel
-                    result={analysisResult}
-                    isAnalyzing={isAnalyzing}
-                    showOverlay={showOverlay}
-                    onToggleOverlay={handleToggleOverlay}
-                  />
-                }
-              />
-            </div>
-          </>
-        )}
-      </div>
+          <aside className="flex min-h-[620px] overflow-hidden rounded-lg border lg:min-h-0" style={{ background: "var(--surface)", borderColor: "var(--border-light)", boxShadow: "var(--shadow-card)" }}>
+            <MaterialSelector
+              selectedMaterial={selectedMaterial}
+              selectedColor={selectedColor}
+              quantity={quantity}
+              stats={meshStats}
+              quote={quote}
+              onMaterialChange={setSelectedMaterial}
+              onColorChange={setSelectedColor}
+              onQuantityChange={setQuantity}
+              onSubmit={handleSubmit}
+              analysisPanel={
+                <AnalysisPanel
+                  result={analysisResult}
+                  isAnalyzing={isAnalyzing}
+                  showOverlay={showOverlay}
+                  onToggleOverlay={handleToggleOverlay}
+                />
+              }
+            />
+          </aside>
+        </section>
+      )}
     </main>
   );
 }

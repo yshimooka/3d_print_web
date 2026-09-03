@@ -15,9 +15,11 @@ function Loader() {
   const { progress } = useProgress();
   return (
     <Html center>
-      <div className="flex flex-col items-center justify-center bg-slate-800/80 p-6 rounded-2xl backdrop-blur-md shadow-2xl border border-slate-700 min-w-[200px]">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-slate-800 rounded-full animate-spin mb-4" />
-        <p className="text-blue-400 font-semibold">{progress.toFixed(0)}% loaded</p>
+      <div className="flex min-w-[200px] flex-col items-center justify-center rounded-lg border p-6 shadow-2xl backdrop-blur-md" style={{ background: "rgba(255,255,255,0.9)", borderColor: "var(--border-light)" }}>
+        <div className="mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[var(--accent-light)] border-t-[var(--accent)]" />
+        <p className="text-[13px] font-bold" style={{ color: "var(--text-primary)" }}>
+          読み込み中 {progress.toFixed(0)}%
+        </p>
       </div>
     </Html>
   );
@@ -25,11 +27,11 @@ function Loader() {
 
 function ErrorFallback({ error }: { error: string }) {
   return (
-    <div className="h-full w-full flex flex-col justify-center items-center bg-slate-900 absolute inset-0 z-10 p-4">
-      <div className="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl flex flex-col items-center max-w-md text-center">
-        <AlertCircle className="text-red-500 w-16 h-16 mb-6 animate-pulse" />
-        <h2 className="text-2xl font-bold text-slate-100 mb-3">Error Loading Model</h2>
-        <p className="text-slate-400">{error}</p>
+    <div className="h-full w-full flex flex-col justify-center items-center absolute inset-0 z-10 p-4" style={{ background: "var(--canvas-bg)" }}>
+      <div className="flex max-w-md flex-col items-center rounded-lg border p-8 text-center shadow-2xl" style={{ background: "rgba(255,255,255,0.94)", borderColor: "var(--border-light)" }}>
+        <AlertCircle className="mb-6 h-14 w-14 animate-pulse" style={{ color: "var(--danger)" }} />
+        <h2 className="mb-3 text-[20px] font-bold" style={{ color: "var(--text-primary)" }}>モデルを読み込めませんでした</h2>
+        <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>{error}</p>
       </div>
     </div>
   );
@@ -252,10 +254,10 @@ function Model({
   if (error) {
     return (
       <Html center>
-        <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-6 rounded-2xl min-w-[250px] text-center backdrop-blur-xl shadow-2xl">
-          <AlertCircle className="w-10 h-10 mx-auto mb-3" />
-          <p className="font-bold text-lg">Failed to load model</p>
-          <p className="text-sm mt-2 max-w-xs opacity-80">{error}</p>
+        <div className="min-w-[250px] rounded-lg border p-6 text-center shadow-2xl backdrop-blur-xl" style={{ background: "rgba(255,255,255,0.94)", borderColor: "var(--border-light)" }}>
+          <AlertCircle className="w-10 h-10 mx-auto mb-3" style={{ color: "var(--danger)" }} />
+          <p className="text-[16px] font-bold" style={{ color: "var(--text-primary)" }}>モデルを読み込めませんでした</p>
+          <p className="mt-2 max-w-xs text-[13px]" style={{ color: "var(--text-secondary)" }}>{error}</p>
         </div>
       </Html>
     );
@@ -340,16 +342,16 @@ export default function CADViewer({
           className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4"
           style={{ background: "rgba(3,3,5,0.7)", backdropFilter: "blur(4px)" }}
         >
-          <p className="text-[15px] font-medium" style={{ color: "var(--text-primary)" }}>
+          <p className="text-[15px] font-medium" style={{ color: "#fff" }}>
             データを読み込んでいます... {parseProgress}%
           </p>
-          <div className="w-64 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--surface-secondary)" }}>
+          <div className="w-64 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.22)" }}>
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{ width: `${parseProgress}%`, background: "var(--accent)" }}
             />
           </div>
-          <p className="text-[12px]" style={{ color: "var(--text-tertiary)" }}>
+          <p className="text-[12px]" style={{ color: "rgba(255,255,255,0.7)" }}>
             大きいファイルは少し時間がかかります
           </p>
         </div>

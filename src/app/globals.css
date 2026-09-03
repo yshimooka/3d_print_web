@@ -1,21 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0A0908;
-  --foreground: #F2EDE8;
-  --surface: rgba(22, 20, 18, 0.5);
-  --surface-secondary: rgba(30, 28, 26, 0.65);
-  --border: rgba(242, 237, 232, 0.08);
-  --border-light: rgba(242, 237, 232, 0.04);
-  --text-primary: #F2EDE8;
-  --text-secondary: #8A8480;
-  --text-tertiary: #5C5A58;
-  /* Burnt copper — kiln/forge/resin printer resonance, distinct from default blue */
-  --accent: #D4702A;
-  --accent-hover: #E0803A;
-  --accent-light: rgba(212, 112, 42, 0.12);
-  --success: #5BA85A;
-  --canvas-bg: #070706;
+  --background: #f7f6f2;
+  --foreground: #1e2528;
+  --surface: #ffffff;
+  --surface-secondary: #f0eee8;
+  --surface-muted: #ebe7de;
+  --border: #ded9cf;
+  --border-light: #ebe7de;
+  --text-primary: #1e2528;
+  --text-secondary: #65706d;
+  --text-tertiary: #8b928e;
+  --accent: #c86b3a;
+  --accent-hover: #a9562f;
+  --accent-light: #f4e4d9;
+  --success: #2f7d5c;
+  --success-light: #e5f1eb;
+  --warning: #b7791f;
+  --warning-light: #f7ead3;
+  --danger: #c2413a;
+  --danger-light: #f6dddd;
+  --canvas-bg: #101416;
+  --shadow-soft: 0 18px 50px rgba(74, 61, 47, 0.12);
+  --shadow-card: 0 10px 28px rgba(74, 61, 47, 0.1);
 }
 
 @theme inline {
@@ -27,7 +34,7 @@
 
 html {
   scroll-behavior: smooth;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
@@ -35,52 +42,11 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Hero background: CAD graph-paper grid ─── */
-.hero-bg {
-  background-color: var(--canvas-bg);
-  background-image:
-    linear-gradient(rgba(242, 237, 232, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(242, 237, 232, 0.035) 1px, transparent 1px);
-  background-size: 64px 64px;
-}
-
-/* ─── Glass Panel Utility ─── */
-.glass-panel {
-  background: var(--surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-}
-
-/* ─── Card hover lift ─── */
-.card-lift {
-  transition:
-    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
-}
-.card-lift:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(212, 112, 42, 0.06) inset;
-  border-color: rgba(242, 237, 232, 0.14);
-}
-
-/* ─── Layer-lines divider (evokes FDM 3D print layers) ─── */
-.layer-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  pointer-events: none;
-  width: 100%;
-}
-.layer-lines > span:nth-child(1) { display: block; height: 0.5px; width: 100%; background: var(--border); }
-.layer-lines > span:nth-child(2) { display: block; height: 0.5px; width: 66%;  background: var(--border-light); }
-.layer-lines > span:nth-child(3) { display: block; height: 0.5px; width: 33%;  background: var(--border-light); }
-
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at 16% 8%, rgba(200, 107, 58, 0.08), transparent 28rem),
+    radial-gradient(circle at 86% 6%, rgba(47, 125, 92, 0.08), transparent 24rem),
+    var(--background);
   color: var(--foreground);
   font-family:
     var(--font-sans),
@@ -91,16 +57,15 @@ body {
   margin: 0;
   padding: 0;
   font-feature-settings: "kern" 1;
+  font-variant-numeric: tabular-nums;
   text-rendering: optimizeLegibility;
 }
 
-/* Selection */
 ::selection {
-  background: rgba(212, 112, 42, 0.3);
-  color: #fff;
+  background: rgba(200, 107, 58, 0.22);
+  color: var(--text-primary);
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -108,24 +73,13 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(242, 237, 232, 0.12);
+  background: rgba(30, 37, 40, 0.18);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(242, 237, 232, 0.25);
+  background: rgba(30, 37, 40, 0.32);
 }
 
-/* ─── Entrance animation initial states ─── */
-/* CSS sets initial hidden state so there's no JS-hydration flash.
-   [data-entrance]: hero text, Reveal wrappers.
-   [data-stagger] > *: StaggerReveal children. */
-[data-entrance],
-[data-stagger] > * {
-  opacity: 0;
-  transform: translateY(24px);
-}
-
-/* Number input spinners removed globally */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -133,4 +87,30 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  outline-color: var(--accent);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(200, 107, 58, 0.28);
+  outline-offset: 3px;
+}
+
+.static-content table {
+  border-collapse: collapse;
+}
+
+.static-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }

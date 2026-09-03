@@ -3,131 +3,136 @@
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import { materials, type Material, type MaterialColor } from "@/data/materials";
-import { Check, ChevronRight, Minus, Plus, X } from "lucide-react";
+import { deliveryWindow, unitPriceFor, type MeshStats, type Quote } from "@/lib/quote";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  Info,
+  Minus,
+  Plus,
+  ShieldCheck,
+  Truck,
+} from "lucide-react";
 
 interface MaterialSelectorProps {
   selectedMaterial: Material | null;
   selectedColor: MaterialColor | null;
   quantity: number;
+  stats: MeshStats | null;
+  quote: Quote | null;
   onMaterialChange: (material: Material) => void;
   onColorChange: (color: MaterialColor) => void;
   onQuantityChange: (quantity: number) => void;
   onSubmit: () => void;
-  fileName: string;
   analysisPanel?: ReactNode;
+}
+
+function isLight(hex: string) {
+  return ["#F5F5F5", "#E0F2FE", "#FEF3C7", "#DBEAFE", "#C0C0C0"].includes(hex);
+}
+
+function presetLabelFor(index: number) {
+  if (index === 0) return "迷ったらこれ";
+  if (index === 1) return "細かい表現に";
+  return "強度が必要な部品に";
 }
 
 export default function MaterialSelector({
   selectedMaterial,
   selectedColor,
   quantity,
+  stats,
+  quote,
   onMaterialChange,
   onColorChange,
   onQuantityChange,
   onSubmit,
-  fileName,
   analysisPanel,
 }: MaterialSelectorProps) {
   const [detailMaterial, setDetailMaterial] = useState<Material | null>(null);
+  const delivery = deliveryWindow();
+
+  const priceLabelFor = (material: Material) =>
+    stats
+      ? `このモデル: ¥${unitPriceFor(material, stats).toLocaleString()} / 個`
+      : `¥${material.pricePerCm3.toLocaleString()}/cm³〜`;
 
   const handleMaterialClick = (material: Material) => {
     onMaterialChange(material);
-    if (material.colors.length > 0) {
-      onColorChange(material.colors[0]);
-    }
+    if (material.colors.length > 0) onColorChange(material.colors[0]);
   };
 
-  const estimatedPrice = selectedMaterial
-    ? selectedMaterial.pricePerCm3 * 10 * quantity
-    : 0;
-
-  const isLight = (hex: string) =>
-    ["#F5F5F5", "#E0F2FE", "#FEF3C7", "#DBEAFE", "#C0C0C0"].includes(hex);
-
-  // Detail view for a single material
   if (detailMaterial) {
     return (
-      <div className="h-full flex flex-col">
-        {/* Detail Header */}
-        <div className="shrink-0 p-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
+      <div className="flex h-full w-full flex-col">
+        <div className="flex shrink-0 items-center justify-between border-b p-4" style={{ borderColor: "var(--border-light)" }}>
           <button
             onClick={() => setDetailMaterial(null)}
-            className="w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors"
-            style={{ color: 'var(--text-secondary)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-secondary)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)]"
+            style={{ color: "var(--text-secondary)" }}
+            aria-label="素材詳細を閉じる"
           >
-            <X size={16} />
+            <ArrowLeft size={18} strokeWidth={1.9} />
           </button>
-          <span className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>
-            {detailMaterial.nameJa}
+          <span className="text-[14px] font-bold" style={{ color: "var(--text-primary)" }}>
+            素材の詳細
           </span>
-          <div className="w-7" />
+          <div className="h-9 w-9" />
         </div>
 
-        {/* Detail Content */}
         <div className="flex-1 overflow-y-auto">
-          {/* Hero Image */}
-          <div className="relative w-full aspect-square" style={{ background: 'var(--surface-secondary)' }}>
-            <Image
-              src={detailMaterial.image}
-              alt={detailMaterial.nameJa}
-              fill
-              className="object-cover"
-            />
+          <div className="relative aspect-[4/3]" style={{ background: "var(--surface-secondary)" }}>
+            <Image src={detailMaterial.image} alt={detailMaterial.nameJa} fill className="object-cover" sizes="400px" />
           </div>
-
-          <div className="p-5 space-y-4">
-            {/* Title + Price */}
+          <div className="space-y-5 p-5">
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-base">{detailMaterial.icon}</span>
-                <h3 className="text-[16px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {detailMaterial.nameJa}
-                </h3>
-                <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-                  {detailMaterial.name}
-                </span>
-              </div>
-              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              <p className="mb-2 text-[13px] font-bold" style={{ color: "var(--accent)" }}>
+                {detailMaterial.method}
+              </p>
+              <h3 className="text-[22px] font-bold" style={{ color: "var(--text-primary)" }}>
+                {detailMaterial.nameJa}
+              </h3>
+              <p className="mt-3 text-[14px] leading-[1.85]" style={{ color: "var(--text-secondary)" }}>
                 {detailMaterial.details}
               </p>
             </div>
 
-            {/* Specs */}
-            <div className="rounded-lg p-3" style={{ background: 'var(--surface-secondary)' }}>
-              <div className="flex justify-between text-[12px]">
-                <span style={{ color: 'var(--text-tertiary)' }}>価格目安</span>
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>¥{detailMaterial.pricePerCm3}/cm³〜</span>
-              </div>
+            <div className="rounded-lg p-4" style={{ background: "var(--surface-secondary)" }}>
+              {[
+                ["価格", priceLabelFor(detailMaterial)],
+                ["精度", detailMaterial.tolerance],
+                ["積層ピッチ", detailMaterial.layerHeight],
+                ["最大サイズ", `${detailMaterial.maxSizeMm.join(" × ")} mm`],
+              ].map(([label, value]) => (
+                <div key={label} className="flex justify-between gap-4 py-2 text-[13px]">
+                  <span style={{ color: "var(--text-secondary)" }}>{label}</span>
+                  <span className="text-right font-bold" style={{ color: "var(--text-primary)" }}>
+                    {value}
+                  </span>
+                </div>
+              ))}
             </div>
 
-            {/* Features */}
-            <div className="flex flex-wrap gap-1.5">
-              {detailMaterial.features.map((f) => (
-                <span
-                  key={f}
-                  className="text-[11px] px-2.5 py-1 rounded-full"
-                  style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}
-                >
-                  {f}
+            <div className="flex flex-wrap gap-2">
+              {detailMaterial.features.map((feature) => (
+                <span key={feature} className="rounded-lg px-3 py-1.5 text-[12px] font-bold" style={{ background: "var(--accent-light)", color: "var(--accent)" }}>
+                  {feature}
                 </span>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Select button */}
-        <div className="shrink-0 p-4" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="shrink-0 border-t p-4" style={{ borderColor: "var(--border-light)" }}>
           <button
             onClick={() => {
               handleMaterialClick(detailMaterial);
               setDetailMaterial(null);
             }}
-            className="w-full h-10 rounded-lg text-[13px] font-medium transition-all cursor-pointer active:scale-[0.98]"
-            style={{ background: 'var(--accent)', color: '#FFFFFF' }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-hover)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--accent)')}
+            className="h-11 w-full rounded-lg text-[14px] font-bold text-white transition-all active:scale-[0.98]"
+            style={{ background: "var(--accent)" }}
           >
             この素材を選択
           </button>
@@ -136,98 +141,85 @@ export default function MaterialSelector({
     );
   }
 
-  // Main list view
   return (
-    <div className="h-full flex flex-col">
-      {/* Scrollable Content */}
+    <div className="flex h-full w-full flex-col">
       <div className="flex-1 overflow-y-auto">
-        {/* Section: Material */}
-        <div className="p-5">
-          <h3
-            className="text-[11px] font-semibold uppercase tracking-[0.06em] mb-3"
-            style={{ color: 'var(--text-tertiary)' }}
-          >
-            素材を選択
-          </h3>
-          <div className="space-y-2">
-            {materials.map((material) => {
-              const isSelected = selectedMaterial?.id === material.id;
+        <div className="border-b p-5" style={{ borderColor: "var(--border-light)" }}>
+          <p className="mb-2 text-[13px] font-bold" style={{ color: "var(--accent)" }}>
+            Step 2
+          </p>
+          <h2 className="text-[22px] font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>
+            素材と数量を選ぶ
+          </h2>
+          <p className="mt-3 text-[13px] leading-[1.75]" style={{ color: "var(--text-secondary)" }}>
+            用途に近い素材を選ぶと、下部の見積もりが更新されます。
+          </p>
+        </div>
 
+        {analysisPanel && (
+          <section className="border-b p-5" style={{ borderColor: "var(--border-light)" }}>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-[14px] font-bold" style={{ color: "var(--text-primary)" }}>
+                印刷チェック
+              </h3>
+              <span className="text-[12px] font-semibold" style={{ color: "var(--text-tertiary)" }}>
+                自動解析
+              </span>
+            </div>
+            {analysisPanel}
+          </section>
+        )}
+
+        <section className="border-b p-5" style={{ borderColor: "var(--border-light)" }}>
+          <h3 className="mb-3 text-[14px] font-bold" style={{ color: "var(--text-primary)" }}>
+            素材プリセット
+          </h3>
+          <div className="space-y-3">
+            {materials.map((material, index) => {
+              const isSelected = selectedMaterial?.id === material.id;
               return (
-                <div
+                <article
                   key={material.id}
-                  className="rounded-xl overflow-hidden transition-all duration-150"
+                  className="overflow-hidden rounded-lg border transition-all"
                   style={{
-                    border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
-                    background: isSelected ? 'var(--accent-light)' : 'var(--surface)',
+                    background: isSelected ? "var(--accent-light)" : "var(--surface)",
+                    borderColor: isSelected ? "rgba(200,107,58,0.55)" : "var(--border-light)",
                   }}
                 >
-                  <button
-                    onClick={() => handleMaterialClick(material)}
-                    className="w-full text-left cursor-pointer"
-                  >
-                    {/* Thumbnail row */}
-                    <div className="flex items-center gap-3 p-3">
-                      {/* Thumbnail */}
-                      <div
-                        className="w-14 h-14 rounded-lg shrink-0 relative overflow-hidden"
-                        style={{ background: 'var(--surface-secondary)' }}
-                      >
-                        <Image
-                          src={material.image}
-                          alt={material.nameJa}
-                          fill
-                          className="object-cover"
-                          sizes="56px"
-                        />
+                  <button onClick={() => handleMaterialClick(material)} className="w-full text-left">
+                    <div className="flex gap-3 p-3">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg" style={{ background: "var(--surface-secondary)" }}>
+                        <Image src={material.image} alt={material.nameJa} fill className="object-cover" sizes="80px" />
                       </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <span
-                            className="text-[13px] font-medium"
-                            style={{ color: isSelected ? 'var(--accent)' : 'var(--text-primary)' }}
-                          >
-                            {material.nameJa}
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="rounded-lg px-2 py-1 text-[11px] font-bold" style={{ background: isSelected ? "rgba(255,255,255,0.58)" : "var(--surface-secondary)", color: "var(--accent)" }}>
+                            {presetLabelFor(index)}
                           </span>
-                          {isSelected && <Check size={13} style={{ color: 'var(--accent)' }} />}
+                          {isSelected && <Check size={15} strokeWidth={2.2} style={{ color: "var(--accent)" }} />}
                         </div>
-                        <p
-                          className="text-[12px] leading-snug truncate"
-                          style={{ color: 'var(--text-secondary)' }}
-                        >
+                        <h4 className="text-[15px] font-bold" style={{ color: "var(--text-primary)" }}>
+                          {material.nameJa}
+                        </h4>
+                        <p className="mt-1 line-clamp-2 text-[12px] leading-[1.55]" style={{ color: "var(--text-secondary)" }}>
                           {material.description}
                         </p>
-                        <span
-                          className="text-[11px]"
-                          style={{ color: 'var(--text-tertiary)' }}
-                        >
-                          ¥{material.pricePerCm3}/cm³〜
-                        </span>
+                        <p className="mt-2 text-[12px] font-bold" style={{ color: "var(--text-primary)" }}>
+                          {priceLabelFor(material)}
+                        </p>
                       </div>
                     </div>
                   </button>
 
-                  {/* Expanded section when selected */}
                   {isSelected && (
                     <div className="px-3 pb-3">
-                      {/* Detail link */}
                       <button
                         onClick={() => setDetailMaterial(material)}
-                        className="text-[11px] font-medium mb-3 cursor-pointer transition-opacity hover:opacity-70"
-                        style={{ color: 'var(--accent)' }}
+                        className="mb-3 text-[12px] font-bold transition-opacity hover:opacity-75"
+                        style={{ color: "var(--accent)" }}
                       >
-                        詳細を見る →
+                        素材の詳細を見る
                       </button>
-
-                      {/* Colors */}
-                      <p
-                        className="text-[11px] font-semibold uppercase tracking-[0.06em] mb-2"
-                        style={{ color: 'var(--text-tertiary)' }}
-                      >
-                        カラー
-                      </p>
                       <div className="flex flex-wrap gap-2">
                         {material.colors.map((color) => {
                           const isColorSelected = selectedColor?.hex === color.hex;
@@ -236,25 +228,22 @@ export default function MaterialSelector({
                               key={color.hex}
                               onClick={() => onColorChange(color)}
                               title={color.name}
-                              className="w-7 h-7 rounded-full transition-all duration-150 cursor-pointer relative"
+                              className="relative h-8 w-8 rounded-lg transition-transform active:scale-95"
                               style={{
                                 backgroundColor: color.hex,
                                 boxShadow: isColorSelected
-                                  ? `0 0 0 2px var(--surface), 0 0 0 3.5px var(--accent)`
+                                  ? "0 0 0 2px #fff, 0 0 0 4px var(--accent)"
                                   : isLight(color.hex)
-                                    ? 'inset 0 0 0 1px rgba(0,0,0,0.1)'
-                                    : 'none',
-                                transform: isColorSelected ? 'scale(1.1)' : 'scale(1)',
+                                    ? "inset 0 0 0 1px rgba(30,37,40,0.14)"
+                                    : "none",
                               }}
                             >
                               {isColorSelected && (
                                 <Check
-                                  size={12}
+                                  size={14}
                                   strokeWidth={2.5}
                                   className="absolute inset-0 m-auto"
-                                  style={{
-                                    color: isLight(color.hex) ? 'var(--text-primary)' : '#FFFFFF',
-                                  }}
+                                  style={{ color: isLight(color.hex) ? "var(--text-primary)" : "#fff" }}
                                 />
                               )}
                             </button>
@@ -263,134 +252,111 @@ export default function MaterialSelector({
                       </div>
                     </div>
                   )}
-                </div>
+                </article>
               );
             })}
           </div>
-        </div>
+        </section>
 
-        {/* Divider */}
-        <div className="mx-5" style={{ height: '1px', background: 'var(--border-light)' }} />
-
-        {/* Analysis Panel */}
-        {analysisPanel && (
-          <>
-            <div className="p-5">
-              <h3
-                className="text-[11px] font-semibold uppercase tracking-[0.06em] mb-3"
-                style={{ color: 'var(--text-tertiary)' }}
-              >
-                印刷チェック
-              </h3>
-              {analysisPanel}
-            </div>
-            <div className="mx-5" style={{ height: '1px', background: 'var(--border-light)' }} />
-          </>
-        )}
-
-        {/* Section: Quantity */}
-        <div className="p-5">
-          <h3
-            className="text-[11px] font-semibold uppercase tracking-[0.06em] mb-3"
-            style={{ color: 'var(--text-tertiary)' }}
-          >
+        <section className="p-5">
+          <h3 className="mb-3 text-[14px] font-bold" style={{ color: "var(--text-primary)" }}>
             数量
           </h3>
-          <div
-            className="flex items-center rounded-lg overflow-hidden"
-            style={{ border: '1px solid var(--border)' }}
-          >
+          <div className="flex items-center overflow-hidden rounded-lg border" style={{ borderColor: "var(--border-light)" }}>
             <button
               onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-              className="w-10 h-10 flex items-center justify-center transition-colors cursor-pointer"
-              style={{ color: 'var(--text-secondary)', background: 'var(--surface-secondary)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--border)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--surface-secondary)')}
+              className="flex h-11 w-12 items-center justify-center transition-colors hover:bg-[var(--surface-muted)]"
+              style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
+              aria-label="数量を減らす"
             >
-              <Minus size={14} />
+              <Minus size={15} strokeWidth={2} />
             </button>
             <input
               type="number"
               min={1}
               max={100}
               value={quantity}
-              onChange={(e) =>
-                onQuantityChange(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))
-              }
-              className="flex-1 text-center text-[15px] font-semibold outline-none bg-transparent"
-              style={{ color: 'var(--text-primary)' }}
+              onChange={(e) => onQuantityChange(Math.max(1, Math.min(100, parseInt(e.target.value, 10) || 1)))}
+              className="h-11 min-w-0 flex-1 bg-transparent text-center text-[16px] font-bold"
+              style={{ color: "var(--text-primary)" }}
+              aria-label="数量"
             />
             <button
               onClick={() => onQuantityChange(Math.min(100, quantity + 1))}
-              className="w-10 h-10 flex items-center justify-center transition-colors cursor-pointer"
-              style={{ color: 'var(--text-secondary)', background: 'var(--surface-secondary)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--border)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--surface-secondary)')}
+              className="flex h-11 w-12 items-center justify-center transition-colors hover:bg-[var(--surface-muted)]"
+              style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
+              aria-label="数量を増やす"
             >
-              <Plus size={14} />
+              <Plus size={15} strokeWidth={2} />
             </button>
           </div>
-        </div>
+        </section>
       </div>
 
-      {/* Footer: Summary + CTA */}
-      <div className="shrink-0 p-5" style={{ borderTop: '1px solid var(--border)' }}>
-        {selectedMaterial && selectedColor ? (
+      <div className="shrink-0 border-t p-5" style={{ borderColor: "var(--border-light)", background: "#fff" }}>
+        {selectedMaterial && selectedColor && quote ? (
           <>
-            <div className="space-y-1.5 mb-4">
-              <div className="flex justify-between text-[13px]">
-                <span style={{ color: 'var(--text-secondary)' }}>素材</span>
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                  {selectedMaterial.nameJa}
+            {quote.issues.filter((issue) => issue.blocking).map((issue) => (
+              <div key={issue.type} className="mb-3 flex items-start gap-2 rounded-lg p-3 text-[12px] leading-relaxed" style={{ background: "var(--danger-light)", color: "var(--danger)" }}>
+                <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+                <span>{issue.message}</span>
+              </div>
+            ))}
+
+            <div className="space-y-2">
+              <div className="flex justify-between gap-4 text-[13px]">
+                <span style={{ color: "var(--text-secondary)" }}>造形価格（¥{quote.unitPrice.toLocaleString()} × {quantity}個）</span>
+                <span className="font-bold" style={{ color: "var(--text-primary)" }}>¥{quote.printSubtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-[13px]">
+                <span style={{ color: "var(--text-secondary)" }}>基本手数料（検品・梱包）</span>
+                <span className="font-bold" style={{ color: "var(--text-primary)" }}>¥{quote.handlingFee.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-[13px]">
+                <span style={{ color: "var(--text-secondary)" }}>送料（全国一律）</span>
+                <span className="font-bold" style={{ color: quote.shippingFee === 0 ? "var(--success)" : "var(--text-primary)" }}>
+                  {quote.shippingFee === 0 ? "無料" : `¥${quote.shippingFee.toLocaleString()}`}
                 </span>
               </div>
-              <div className="flex justify-between text-[13px]">
-                <span style={{ color: 'var(--text-secondary)' }}>カラー</span>
-                <div className="flex items-center gap-1.5">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{
-                      backgroundColor: selectedColor.hex,
-                      boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.1)',
-                    }}
-                  />
-                  <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {selectedColor.name}
-                  </span>
-                </div>
-              </div>
-              <div className="flex justify-between text-[13px]">
-                <span style={{ color: 'var(--text-secondary)' }}>数量</span>
-                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                  {quantity}個
+              <div className="my-3 border-t" style={{ borderColor: "var(--border-light)" }} />
+              <div className="flex items-end justify-between gap-4">
+                <span className="text-[13px] font-bold" style={{ color: "var(--text-primary)" }}>
+                  合計（税込）
                 </span>
-              </div>
-              <div className="my-2" style={{ height: '1px', background: 'var(--border-light)' }} />
-              <div className="flex justify-between items-baseline">
-                <span className="text-[13px]" style={{ color: 'var(--text-secondary)' }}>
-                  参考価格
-                </span>
-                <span className="text-[20px] font-semibold tracking-[-0.02em]" style={{ color: 'var(--text-primary)' }}>
-                  ¥{estimatedPrice.toLocaleString()}
-                  <span className="text-[12px] font-normal" style={{ color: 'var(--text-tertiary)' }}>〜</span>
+                <span className="text-[28px] font-bold" style={{ color: "var(--accent)" }}>
+                  ¥{quote.total.toLocaleString()}
                 </span>
               </div>
             </div>
+
+            <div className="mt-3 space-y-2">
+              <div className="flex items-start gap-2 text-[12px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
+                <Truck size={15} className="mt-0.5 shrink-0" />
+                <span>お届け予定: {delivery.label}（検品後に発送）</span>
+              </div>
+              <div className="flex items-start gap-2 text-[12px] leading-[1.6]" style={{ color: "var(--text-secondary)" }}>
+                <ShieldCheck size={15} className="mt-0.5 shrink-0" style={{ color: "var(--success)" }} />
+                <span>この金額から追加費用はかかりません。品質不良は無償で対応します。</span>
+              </div>
+            </div>
+
             <button
               onClick={onSubmit}
-              className="w-full h-11 rounded-lg text-[14px] font-medium flex items-center justify-center gap-1.5 transition-all duration-200 cursor-pointer active:scale-[0.98]"
-              style={{ background: 'var(--accent)', color: '#FFFFFF' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--accent-hover)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'var(--accent)')}
+              disabled={!quote.orderable}
+              className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-lg text-[14px] font-bold text-white transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45"
+              style={{ background: "var(--accent)" }}
             >
               注文へ進む
-              <ChevronRight size={15} />
+              <ChevronRight size={16} strokeWidth={2.2} />
             </button>
           </>
         ) : (
-          <p className="text-[13px] text-center py-2" style={{ color: 'var(--text-tertiary)' }}>
-            素材を選択してください
-          </p>
+          <div className="flex items-start gap-2 rounded-lg p-3" style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}>
+            <Info size={16} className="mt-0.5 shrink-0" />
+            <p className="text-[13px] leading-[1.7]">
+              {selectedMaterial ? "価格を計算しています。" : "素材を選択すると、税込総額とお届け目安が表示されます。"}
+            </p>
+          </div>
         )}
       </div>
     </div>
